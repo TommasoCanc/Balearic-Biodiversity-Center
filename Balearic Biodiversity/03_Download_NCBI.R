@@ -1,89 +1,125 @@
-#https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
+######################################
+# Title: NCBI download data          #
+# Author: Tommaso Cancellario        #
+# Reviewer:                          #
+# Creation: 2023 - 03 - 10           #
+# Last update: 2023 - 03 - 10        #
+######################################
 
-# Libraries
+# More info about rentrez package:
+# https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
+
+# Load libraries
 library(rentrez)
 library(stringr)
 
+# NCBI database search
 dataBase <- "nuccore"
-term <- "((((Balearic[All Fields] OR Baleares[All Fields]) OR Mallorca[All Fields]) OR Menorca[All Fields]) OR Ibiza[All Fields]) OR Formentera[All Fields]"
 
-# Searc in Nucleotide database with the terms above.
+# Term to search
+term <- "((((((((((Baleares[All Fields] OR 
+Balearic[All Fields]) OR 
+Menorca[All Fields]) OR 
+Mallorca[All Fields]) OR 
+Ibiza[All Fields]) OR 
+Formentera[All Fields]) OR 
+Cabrera[All Fields]) OR 
+Dragonera[All Fields]) OR 
+(Isla[All Fields] AND del[All Fields] AND Aire[All Fields])) OR 
+(Isla[All Fields] AND de[All Fields] AND Colom[All Fields])) OR 
+Espalmador[All Fields]) OR Espardell[All Fields]"
+
+# Search in Nucleotide database with the terms above.
 a <- entrez_search(db = dataBase, term = term, use_history = T) # <- 144760 hits
 # We need to set the maximum number of results equalt to the number of hits
 a <- entrez_search(db = dataBase, term = term, retmax = a$count, use_history = T)
 
 # Metadata info catch
-
-# The IDs are the most important thing returned here. They allow us to fetch records 
-# matching those IDs, gather summary data about them or find cross-referenced records 
-# in other databases. 
-
-gbank <- entrez_fetch(db = "nuccore", id = a$ids[1], rettype = "gbwithparts", retmode = "text")
-
-
-ncbi.2 <- as.data.frame(matrix(NA, ncol=13))
-colnames(ncbi.2) <- c("sampleid", "species_name","country",
+ncbi.1 <- as.data.frame(matrix(NA, ncol=14))
+colnames(ncbi.1) <- c("sampleid", "species_name","country",
                       "lat", "lon", "markercode", "nucleotides", "nucleotides_bp",
                       "definition", "voucher", "pubmed", "collection_date",
-                      "INV")
+                      "INV", "authors")
 
-gbank <- entrez_fetch(db="nucleotide", id=a$ids[1], rettype="gbwithparts", retmode = "text")
-
-ncbi.2$sampleid[1] <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
-taxonomy <- gsub("\"", "", gsub("^.*ORGANISM\\s*|\\s*.\nREFERENCE.*$", "", gbank))
-taxonomy <- unlist(strsplit(taxonomy, "\n"))
-ncbi.2$species_name[1] <- taxonomy[1]
-
-# COUNTRY
-ncbi.2$country <- as.character(ifelse(grepl("country", gbank) == T,
-                                      gsub("\"","",gsub("^.*country=\\s*|\\s*\n.*$", "", gbank)), NA))
-
-
-# LONGITUDE & LATITUDE
-if(isTRUE(grepl("lat_lon", gbank))) {
+length(a$ids)
+for(i in 1:20){
   
-  lat_lon <- gsub("\"","",gsub("^.*lat_lon=\\s*|\\s*\n.*$", "", gbank))
-
-  # lat_lon <- ifelse(grepl("lat_lon", gbank) == T, 
-  #                   gsub("\"","",gsub("^.*lat_lon=\\s*|\\s*\n.*$", "", gbank)), NA)
+  ncbi.2 <- as.data.frame(matrix(NA, ncol=14))
+  colnames(ncbi.2) <- c("sampleid", "species_name","country",
+                        "lat", "lon", "markercode", "nucleotides", "nucleotides_bp",
+                        "definition", "voucher", "pubmed", "collection_date",
+                        "INV", "authors")
   
-  lon <- as.numeric(word(lat_lon,-2))
-  ncbi.2$lon <- ifelse(word(lat_lon,-1) == "W", -abs(lon), lon)
-  lat <- as.numeric(gsub("\"", "", as.character(word(lat_lon,1))))
-  ncbi.2$lat <- ifelse(word(lat_lon,2) == "S", -abs(lat), lat)
+  # The IDs are the most important thing returned here. They allow us to fetch records 
+  # matching those IDs, gather summary data about them or find cross-referenced records 
+  # in other databases. 
+  gbank <- entrez_fetch(db = "nuccore", id = a$ids[i], rettype = "gbwithparts", retmode = "text")
   
+  # ACCESSION NUMBER
+  ncbi.2$sampleid <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
+  
+  # TAXONOMY
+  taxonomy <- gsub("\"", "", gsub("^.*ORGANISM\\s*|\\s*.\nREFERENCE.*$", "", gbank))
+  taxonomy <- unlist(strsplit(taxonomy, "\n"))
+  ncbi.2$species_name <- taxonomy[1]
+  
+  # COUNTRY
+  ncbi.2$country <- as.character(ifelse(grepl("country", gbank) == T,
+                                        gsub("\"","",gsub("^.*country=\\s*|\\s*\n.*$", "", gbank)), NA))
+  
+  
+  # LONGITUDE & LATITUDE
+  if(isTRUE(grepl("lat_lon", gbank))) {
+    
+    lat_lon <- gsub("\"","",gsub("^.*lat_lon=\\s*|\\s*\n.*$", "", gbank))
+    lon <- as.numeric(word(lat_lon,-2))
+    ncbi.2$lon <- ifelse(word(lat_lon,-1) == "W", -abs(lon), lon)
+    lat <- as.numeric(gsub("\"", "", as.character(word(lat_lon,1))))
+    ncbi.2$lat <- ifelse(word(lat_lon,2) == "S", -abs(lat), lat)
+    
   } else {
-  
-  ncbi.2$lon <- NA
-  ncbi.2$lat <- NA
-
+    
+    ncbi.2$lon <- NA
+    ncbi.2$lat <- NA
+    
   }
+  
+  # MARKER CODE
+  ncbi.2$markercode <- ifelse(grepl("product=", gbank) == T,
+                              gsub("\"","",gsub("^.*product=\\s*|\\s*\n.*$", "", gbank)), NA)
+  
+  # SEQUENCE
+  seq <- gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank))
+  ncbi.2$nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
+  ncbi.2$nucleotides_bp <- nchar(as.character(ncbi.2$nucleotides[1]))
+  
+  # VOUCHER
+  ncbi.2$voucher <- ifelse(grepl("specimen_voucher=", gbank) == T, 
+                           as.character(gsub("\"","",gsub("^.*specimen_voucher=\\s*|\\s*\n.*$", "", gbank))), NA)
+  
+  # DEFINITION
+  ncbi.2$definition <- gsub("\"", "", gsub("^.*DEFINITION\\s*|\\s*.\n.*$", "", gbank))
+  
+  # PUBMED
+  ncbi.2$pubmed <- ifelse(grepl("PUBMED", gbank) == T, 
+                          as.character(gsub("\"", "", gsub("^.*PUBMED\\s*|\\s*\n.*$", "", gbank))), NA)
+  
+  # Collection date
+  ncbi.2$collection_date <- ifelse(grepl("collection_date", gbank) == T, 
+                                   as.character(gsub("\"", "", gsub("^.*collection_date=\\s*|\\s*\n.*$", "", gbank))), NA)
+  
+  # INV
+  ncbi.2$INV <- ifelse(grepl("INV", gbank) == T, 
+                       as.character(gsub("\"", "", gsub("^.*INV\\s*|\\s*\n.*$", "", gbank))), NA)
+  
+  # AUTHORS
+  ncbi.2$authors <- ifelse(grepl("AUTHORS", gbank) == T, 
+                           as.character(gsub("\"", "", gsub("^.*AUTHORS\\s*|\\s*\n.*$", "", gbank))), NA)
+  
 
-# MARKER CODE
-ncbi.2$markercode <- ifelse(grepl("product=", gbank) == T,
-                            gsub("\"","",gsub("^.*product=\\s*|\\s*\n.*$", "", gbank)), NA)
+  # Create total dataset   
+  ncbi.1 <- rbind(ncbi.1, ncbi.2)
 
-# SEUENCE
-seq <- gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank))
-ncbi.2$nucleotides[1] <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
-ncbi.2$nucleotides_bp[1] <- nchar(as.character(ncbi.2$nucleotides[1]))
-
-# VOUCHER
-ncbi.2$voucher[1] <- ifelse(grepl("specimen_voucher=", gbank) == T, 
-                            as.character(gsub("\"","",gsub("^.*specimen_voucher=\\s*|\\s*\n.*$", "", gbank))), NA)
-
-# DEFINITION
-ncbi.2$definition[1] <- gsub("\"", "", gsub("^.*DEFINITION\\s*|\\s*.\n.*$", "", gbank))
-
-# PUBMED
-ncbi.2$pubmed[1] <- ifelse(grepl("PUBMED", gbank) == T, 
-                           as.character(gsub("\"", "", gsub("^.*PUBMED\\s*|\\s*\n.*$", "", gbank))), NA)
-
-# Collection date
-ncbi.2$collection_date[1] <- ifelse(grepl("collection_date", gbank) == T, 
-                                    as.character(gsub("\"", "", gsub("^.*collection_date=\\s*|\\s*\n.*$", "", gbank))), NA)
-
-# INV
-ncbi.2$INV[1] <- ifelse(grepl("INV", gbank) == T, 
-                        as.character(gsub("\"", "", gsub("^.*INV\\s*|\\s*\n.*$", "", gbank))), NA)
-
+  print(paste(i, "---- of ----", length(a$ids), "(", round((i/length(a$ids))*100, digits = 2),"%)"))  
+}
+rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy)
