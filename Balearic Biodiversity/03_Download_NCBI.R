@@ -9,7 +9,7 @@
 # More info about rentrez package:
 # https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
 # Access token 1: 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
-# Access token 2: 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
+# Access token 2: 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
 # Load libraries
 library(rentrez)
 library(stringr)
