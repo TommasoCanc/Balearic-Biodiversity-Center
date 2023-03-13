@@ -12,8 +12,6 @@
 # Load libraries
 library(rentrez)
 library(stringr)
-library(seqinr)
-library(phylotools)
 
 # Functions
 writeFasta <- function(data, filename){
