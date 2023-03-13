@@ -164,6 +164,5 @@ nrow(ncbiInfo) - length(fasta1)
 ncbiInfo <- ncbiInfo[ncbiInfo$sampleid %in% names(fasta1), ]
 unique(ncbiInfo$sampleid == names(fasta1))
 
+# Save cleaned .csv
 write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_100_",Sys.Date(),"_CLEAN.csv"), row.names = FALSE)
-
-
