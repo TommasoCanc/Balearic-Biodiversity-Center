@@ -8,10 +8,12 @@
 
 # More info about rentrez package:
 # https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
-# Access token: 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
+# Access token 1: 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
+# Access token 2: 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
 # Load libraries
 library(rentrez)
 library(stringr)
+library(seqinr)
 
 # Functions
 writeFasta <- function(data, filename){
@@ -140,5 +142,28 @@ rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy, nucleotideFasta.1, nucleotides, 
 
 
 # Save ncbi info and fasta file
-write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1:20_",Sys.Date(),".csv"), row.names = FALSE)
-writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1:20_",Sys.Date(),".fasta"))
+write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_20_",Sys.Date(),".csv"), row.names = FALSE)
+writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1_20_",Sys.Date(),".fasta"))
+
+rm(list = ls())
+
+##############
+# Clean data #
+##############
+
+# Load .csv NCBI Info
+ncbiInfo <- read.csv("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/NCBI/ncbiInfo_1_100_2023-03-13.csv")
+head(ncbiInfo)
+# Load fasta clean
+fasta1 <- read.FASTA(paste0("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/NCBI/ncbiFasta_1_100_2023-03-13_CLEAN.fasta"))
+
+# Check the difference between csv and fasta
+nrow(ncbiInfo) - length(fasta1)
+
+# remove record with no sequence data
+ncbiInfo <- ncbiInfo[ncbiInfo$sampleid %in% names(fasta1), ]
+unique(ncbiInfo$sampleid == names(fasta1))
+
+write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_100_",Sys.Date(),"_CLEAN.csv"), row.names = FALSE)
+
+
