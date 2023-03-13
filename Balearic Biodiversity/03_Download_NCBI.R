@@ -3,15 +3,29 @@
 # Author: Tommaso Cancellario        #
 # Reviewer:                          #
 # Creation: 2023 - 03 - 10           #
-# Last update: 2023 - 03 - 10        #
+# Last update: 2023 - 03 - 13        #
 ######################################
 
 # More info about rentrez package:
 # https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
-
+# Access token: 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
 # Load libraries
 library(rentrez)
 library(stringr)
+library(seqinr)
+library(phylotools)
+
+# Functions
+writeFasta <- function(data, filename){
+  fastaLines = c()
+  for (rowNum in 1:nrow(data)){
+    fastaLines = c(fastaLines, paste0(">", data[rowNum,"seqName"]))
+    fastaLines = c(fastaLines, data[rowNum,"nucleotides"])
+  }
+  fileConn <- file(filename)
+  writeLines(fastaLines, fileConn)
+  close(fileConn)
+}
 
 # NCBI database search
 dataBase <- "nuccore"
@@ -30,23 +44,21 @@ Dragonera[All Fields]) OR
 Espalmador[All Fields]) OR Espardell[All Fields]"
 
 # Search in Nucleotide database with the terms above.
-a <- entrez_search(db = dataBase, term = term, use_history = T) # <- 144760 hits
+a <- entrez_search(db = dataBase, term = term, use_history = T) #
 # We need to set the maximum number of results equalt to the number of hits
 a <- entrez_search(db = dataBase, term = term, retmax = a$count, use_history = T)
 
 # Metadata info catch
-ncbi.1 <- as.data.frame(matrix(NA, ncol=14))
-colnames(ncbi.1) <- c("sampleid", "species_name","country",
-                      "lat", "lon", "markercode", "nucleotides", "nucleotides_bp",
-                      "definition", "voucher", "pubmed", "collection_date",
-                      "INV", "authors")
+ncbiInfo <- data.frame()
+nucleotideFasta <- data.frame()
+colnames(nucleotideFasta)
 
 length(a$ids)
 for(i in 1:20){
   
-  ncbi.2 <- as.data.frame(matrix(NA, ncol=14))
+  ncbi.2 <- as.data.frame(matrix(NA, ncol=13))
   colnames(ncbi.2) <- c("sampleid", "species_name","country",
-                        "lat", "lon", "markercode", "nucleotides", "nucleotides_bp",
+                        "lat", "lon", "markercode", "nucleotides_bp",
                         "definition", "voucher", "pubmed", "collection_date",
                         "INV", "authors")
   
@@ -56,11 +68,11 @@ for(i in 1:20){
   gbank <- entrez_fetch(db = "nuccore", id = a$ids[i], rettype = "gbwithparts", retmode = "text")
   
   # ACCESSION NUMBER
-  ncbi.2$sampleid <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
+  # ncbi.2$sampleid <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
+  ncbi.2$sampleid <- word(gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank)), 1)
   
   # TAXONOMY
-  taxonomy <- gsub("\"", "", gsub("^.*ORGANISM\\s*|\\s*.\nREFERENCE.*$", "", gbank))
-  taxonomy <- unlist(strsplit(taxonomy, "\n"))
+  taxonomy <- unlist(strsplit(taxonomy <- gsub("\"", "", gsub("^.*ORGANISM\\s*|\\s*.\nREFERENCE.*$", "", gbank)), "\n"))
   ncbi.2$species_name <- taxonomy[1]
   
   # COUNTRY
@@ -90,7 +102,10 @@ for(i in 1:20){
   
   # SEQUENCE
   seq <- gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank))
-  ncbi.2$nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
+  # ncbi.2$nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
+  nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
+  nucleotideFasta.1 <- data.frame(seqName =  ncbi.2$sampleid, 
+                                   nucleotides = nucleotides)
   ncbi.2$nucleotides_bp <- nchar(as.character(ncbi.2$nucleotides[1]))
   
   # VOUCHER
@@ -118,8 +133,14 @@ for(i in 1:20){
   
 
   # Create total dataset   
-  ncbi.1 <- rbind(ncbi.1, ncbi.2)
-
+  ncbiInfo <- rbind(ncbiInfo, ncbi.2)
+  nucleotideFasta <- rbind(nucleotideFasta, nucleotideFasta.1)
+  
   print(paste(i, "---- of ----", length(a$ids), "(", round((i/length(a$ids))*100, digits = 2),"%)"))  
 }
-rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy)
+rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy, nucleotideFasta.1, nucleotides, gbank)
+
+
+# Save ncbi info and fasta file
+write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1:20_",Sys.Date(),".csv"), row.names = FALSE)
+writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1:20_",Sys.Date(),".fasta"))
