@@ -3,16 +3,15 @@
 # Author: Tommaso Cancellario        #
 # Reviewer:                          #
 # Creation: 2023 - 02 - 21           #
-# Last update: 2023 - 03 - 06        #
+# Last update: 2023 - 03 - 15        #
 ######################################
 
 # Load libraries
-# library(ConR)
 library(dplyr)
-# library(ggplot2)
 library(rgbif)
-# library(sf)
 library(stringr)
+# library(ggplot2)
+# library(sf)
 
 # Functions
 "%ni%" <- Negate("%in%")
@@ -22,7 +21,7 @@ library(stringr)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/Arachnida_2023_02_28.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/Amphibia_2023_03_15.csv", sep = ";")
 head(species.list)
 
 # Filter genus and species columns
@@ -62,39 +61,39 @@ for(i in 1:length(sp)){
   dat_ne <- dat_ne$data
   
   # Add un if(!is.null(dat_ne)){} 
-
+  
   if(!is.null(dat_ne)){
-  if("scientificName" %in% colnames(dat_ne))
-  {scientificName <- data.frame(dat_ne$scientificName)
-  } else {scientificName <- rep(NA, nrow(dat_ne))}
-  
-  if("acceptedScientificName" %in% colnames(dat_ne))
-  {acceptedScientificName <- data.frame(dat_ne$acceptedScientificName)
-  } else {acceptedScientificName <- rep(NA, nrow(dat_ne))}
-  
-  if("decimalLatitude" %in% colnames(dat_ne))
-  {decimalLatitude <- data.frame(dat_ne$decimalLatitude)
-  } else {decimalLatitude <- rep(NA, nrow(dat_ne))}
-  
-  if("decimalLongitude" %in% colnames(dat_ne))
-  {decimalLongitude <- data.frame(dat_ne$decimalLongitude)
-  } else {decimalLongitude <- rep(NA, nrow(dat_ne))}
-  
-  if("year" %in% colnames(dat_ne))
-  {year <- data.frame(dat_ne$year)
-  } else {year <- rep(NA, nrow(dat_ne))}
-  
-  if("institutionCode" %in% colnames(dat_ne))
-  {institutionCode <- data.frame(dat_ne$institutionCode)
-  } else {institutionCode <- rep(NA, nrow(dat_ne))}
-  
-  if("locality" %in% colnames(dat_ne))
-  {locality <- data.frame(dat_ne$locality)
-  } else {locality <- rep(NA, nrow(dat_ne))}
-  
-  if("datasetName" %in% colnames(dat_ne))
-  {datasetName <- data.frame(dat_ne$datasetName)
-  } else {datasetName <- rep(NA, nrow(dat_ne))}
+    if("scientificName" %in% colnames(dat_ne))
+    {scientificName <- data.frame(dat_ne$scientificName)
+    } else {scientificName <- rep(NA, nrow(dat_ne))}
+    
+    if("acceptedScientificName" %in% colnames(dat_ne))
+    {acceptedScientificName <- data.frame(dat_ne$acceptedScientificName)
+    } else {acceptedScientificName <- rep(NA, nrow(dat_ne))}
+    
+    if("decimalLatitude" %in% colnames(dat_ne))
+    {decimalLatitude <- data.frame(dat_ne$decimalLatitude)
+    } else {decimalLatitude <- rep(NA, nrow(dat_ne))}
+    
+    if("decimalLongitude" %in% colnames(dat_ne))
+    {decimalLongitude <- data.frame(dat_ne$decimalLongitude)
+    } else {decimalLongitude <- rep(NA, nrow(dat_ne))}
+    
+    if("year" %in% colnames(dat_ne))
+    {year <- data.frame(dat_ne$year)
+    } else {year <- rep(NA, nrow(dat_ne))}
+    
+    if("institutionCode" %in% colnames(dat_ne))
+    {institutionCode <- data.frame(dat_ne$institutionCode)
+    } else {institutionCode <- rep(NA, nrow(dat_ne))}
+    
+    if("locality" %in% colnames(dat_ne))
+    {locality <- data.frame(dat_ne$locality)
+    } else {locality <- rep(NA, nrow(dat_ne))}
+    
+    if("datasetName" %in% colnames(dat_ne))
+    {datasetName <- data.frame(dat_ne$datasetName)
+    } else {datasetName <- rep(NA, nrow(dat_ne))}
     
     dat_ne <- cbind(scientificName, acceptedScientificName, decimalLatitude, decimalLongitude,
                     year, institutionCode, locality, datasetName)
@@ -126,7 +125,7 @@ for(i in 1:length(sp)){
   info$presenceAbsence <- ifelse(info$nOcc.BAL >= 5, "present", "absent") 
   
   sp.gbif$info <- rbind(sp.gbif$info, info)
- 
+  
   sp.gbif$data <- rbind(sp.gbif$data, dat_ne)
   
   print(paste(i, "--- of ---", length(sp)))
@@ -146,9 +145,11 @@ sp.gbif$info$source <- "Original list"
 
 # Remove genus if does not work.
 # Eschatocephalus (i=50)
-gen <- gen[-50]
+# gen <- gen[-50]
 
-# Check if the original list is complete, we search in GBIF all the species belonging to a specific genus
+# Check if the original list is complete, we search in GBIF all the species 
+# belonging to a specific genus
+
 sp.gen <- data.frame()
 
 for(i in 1:length(gen)){
@@ -171,6 +172,8 @@ for(i in 1:length(gen)){
 }
 rm(acceptedName.check, tax_key, i, key)
 
+# Check if we have different genus compared to the original list
+unique(word(sp.gen$Taxa, 1)) %in% gen
 
 sp.gen <- sp.gen$Taxa
 genus.gbif <- list(info = data.frame(),
@@ -178,7 +181,8 @@ genus.gbif <- list(info = data.frame(),
 
 # NOTE: Check and remove i Taxa if the loop is blocked.
 # Removed Arachnida: 111-Aranea spec;
-sp.gen[923]
+# sp.gen[923]
+
 for(i in 1:length(sp.gen)){
   
   # Use the name_suggest function to get the gbif taxon key
@@ -187,87 +191,87 @@ for(i in 1:length(sp.gen)){
   acceptedName.check <- name_usage(key = key)
   fossil <- occ_search(taxonKey = key, limit = 1)$data$basisOfRecord
   
-    # Number of occurrence in Spain
-    nOcc <- occ_count(key, country = "ES")
+  # Number of occurrence in Spain
+  nOcc <- occ_count(key, country = "ES")
+  
+  # List of occurrence in Balearic islands
+  dat_ne <- occ_search(taxonKey = key, hasCoordinate = T, 
+                       geometry = balearic, limit = 199999)
+  nOccBal <- dat_ne$meta$count
+  dat_ne <- dat_ne$data
+  
+  # Add un if(!is.null(dat_ne)){} 
+  
+  if(!is.null(dat_ne)){
+    if("scientificName" %in% colnames(dat_ne))
+    {scientificName <- data.frame(dat_ne$scientificName)
+    } else {scientificName <- rep(NA, nrow(dat_ne))}
     
-    # List of occurrence in Balearic islands
-    dat_ne <- occ_search(taxonKey = key, hasCoordinate = T, 
-                         geometry = balearic, limit = 199999)
-    nOccBal <- dat_ne$meta$count
-    dat_ne <- dat_ne$data
+    if("acceptedScientificName" %in% colnames(dat_ne))
+    {acceptedScientificName <- data.frame(dat_ne$acceptedScientificName)
+    } else {acceptedScientificName <- rep(NA, nrow(dat_ne))}
     
-    # Add un if(!is.null(dat_ne)){} 
+    if("decimalLatitude" %in% colnames(dat_ne))
+    {decimalLatitude <- data.frame(dat_ne$decimalLatitude)
+    } else {decimalLatitude <- rep(NA, nrow(dat_ne))}
     
-    if(!is.null(dat_ne)){
-      if("scientificName" %in% colnames(dat_ne))
-      {scientificName <- data.frame(dat_ne$scientificName)
-      } else {scientificName <- rep(NA, nrow(dat_ne))}
-      
-      if("acceptedScientificName" %in% colnames(dat_ne))
-      {acceptedScientificName <- data.frame(dat_ne$acceptedScientificName)
-      } else {acceptedScientificName <- rep(NA, nrow(dat_ne))}
-      
-      if("decimalLatitude" %in% colnames(dat_ne))
-      {decimalLatitude <- data.frame(dat_ne$decimalLatitude)
-      } else {decimalLatitude <- rep(NA, nrow(dat_ne))}
-      
-      if("decimalLongitude" %in% colnames(dat_ne))
-      {decimalLongitude <- data.frame(dat_ne$decimalLongitude)
-      } else {decimalLongitude <- rep(NA, nrow(dat_ne))}
-      
-      if("year" %in% colnames(dat_ne))
-      {year <- data.frame(dat_ne$year)
-      } else {year <- rep(NA, nrow(dat_ne))}
-      
-      if("institutionCode" %in% colnames(dat_ne))
-      {institutionCode <- data.frame(dat_ne$institutionCode)
-      } else {institutionCode <- rep(NA, nrow(dat_ne))}
-      
-      if("locality" %in% colnames(dat_ne))
-      {locality <- data.frame(dat_ne$locality)
-      } else {locality <- rep(NA, nrow(dat_ne))}
-      
-      if("datasetName" %in% colnames(dat_ne))
-      {datasetName <- data.frame(dat_ne$datasetName)
-      } else {datasetName <- rep(NA, nrow(dat_ne))}
-      
-      if("basisOfRecord" %in% colnames(dat_ne))
-      {basisOfRecord <- data.frame(dat_ne$basisOfRecord)
-      } else {basisOfRecord <- rep(NA, nrow(dat_ne))}
-      
-      dat_ne <- cbind(scientificName, acceptedScientificName, decimalLatitude, decimalLongitude,
-                      year, institutionCode, locality, datasetName, basisOfRecord)
-      
-      colnames(dat_ne) <- c("scientificName", "acceptedScientificName", "decimalLatitude", 
-                            "decimalLongitude", "year", "institutionCode", 
-                            "locality", "datasetName", "basisOfRecord")
-      
-    } else {
-      
-      dat_ne <- data.frame(scientificName = sp.gen[i], 
-                           acceptedScientificName = acceptedName.check$data$scientificName, 
-                           decimalLatitude = NA, 
-                           decimalLongitude = NA,
-                           year = NA, 
-                           institutionCode = NA, 
-                           locality = NA, 
-                           datasetName = NA,
-                           basisOfRecord = ifelse(!is.null(fossil), fossil, NA))
-    }
+    if("decimalLongitude" %in% colnames(dat_ne))
+    {decimalLongitude <- data.frame(dat_ne$decimalLongitude)
+    } else {decimalLongitude <- rep(NA, nrow(dat_ne))}
     
+    if("year" %in% colnames(dat_ne))
+    {year <- data.frame(dat_ne$year)
+    } else {year <- rep(NA, nrow(dat_ne))}
     
-    info <- data.frame(originalSpecies = sp.gen[i],
-                       acceptedName = acceptedName.check$data$scientificName, #unique(dat_ne$acceptedScientificName),
-                       tax_key = key,
-                       status = tax_key$status,
-                       nOcc.ES = nOcc,
-                       nOcc.BAL = nOccBal)
-    # We consider the species present if the number of occurrence is >= 5
-    info$presenceAbsence <- ifelse(info$nOcc.BAL >= 5, "present", "absent")
+    if("institutionCode" %in% colnames(dat_ne))
+    {institutionCode <- data.frame(dat_ne$institutionCode)
+    } else {institutionCode <- rep(NA, nrow(dat_ne))}
     
-    genus.gbif$info <- rbind(genus.gbif$info, info)
+    if("locality" %in% colnames(dat_ne))
+    {locality <- data.frame(dat_ne$locality)
+    } else {locality <- rep(NA, nrow(dat_ne))}
     
-    genus.gbif$data <- rbind(genus.gbif$data, dat_ne)
+    if("datasetName" %in% colnames(dat_ne))
+    {datasetName <- data.frame(dat_ne$datasetName)
+    } else {datasetName <- rep(NA, nrow(dat_ne))}
+    
+    if("basisOfRecord" %in% colnames(dat_ne))
+    {basisOfRecord <- data.frame(dat_ne$basisOfRecord)
+    } else {basisOfRecord <- rep(NA, nrow(dat_ne))}
+    
+    dat_ne <- cbind(scientificName, acceptedScientificName, decimalLatitude, decimalLongitude,
+                    year, institutionCode, locality, datasetName, basisOfRecord)
+    
+    colnames(dat_ne) <- c("scientificName", "acceptedScientificName", "decimalLatitude", 
+                          "decimalLongitude", "year", "institutionCode", 
+                          "locality", "datasetName", "basisOfRecord")
+    
+  } else {
+    
+    dat_ne <- data.frame(scientificName = sp.gen[i], 
+                         acceptedScientificName = acceptedName.check$data$scientificName, 
+                         decimalLatitude = NA, 
+                         decimalLongitude = NA,
+                         year = NA, 
+                         institutionCode = NA, 
+                         locality = NA, 
+                         datasetName = NA,
+                         basisOfRecord = ifelse(!is.null(fossil), fossil, NA))
+  }
+  
+  
+  info <- data.frame(originalSpecies = sp.gen[i],
+                     acceptedName = acceptedName.check$data$scientificName, #unique(dat_ne$acceptedScientificName),
+                     tax_key = key,
+                     status = tax_key$status,
+                     nOcc.ES = nOcc,
+                     nOcc.BAL = nOccBal)
+  # We consider the species present if the number of occurrence is >= 5
+  info$presenceAbsence <- ifelse(info$nOcc.BAL >= 5, "present", "absent")
+  
+  genus.gbif$info <- rbind(genus.gbif$info, info)
+  
+  genus.gbif$data <- rbind(genus.gbif$data, dat_ne)
   
   print(paste(i, "--- of ---", length(sp.gen)))
 }
@@ -303,11 +307,11 @@ genus.gbif$data <- filter(genus.gbif$data, rowSums(is.na(genus.gbif$data)) != nc
 gbifInfo <- merge(sp.gbif$info, genus.gbif$info, by = "acceptedName", all = TRUE)
 
 # Save .csv
-write.csv2(gbifInfo, paste0("./Lists/gbif/Arachnida_gbifInfo_", Sys.Date(),".csv"), row.names = F)
-write.csv2(genus.gbif$info, paste0("./Lists/gbif/Arachnida_genusInfo_", Sys.Date(),".csv"), row.names = F)
+write.csv2(gbifInfo, paste0("./Lists/gbif/Amphibia_gbifInfo_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(genus.gbif$info, paste0("./Lists/gbif/Amphibia_genusInfo_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
 
-write.csv2(sp.gbif$data, paste0("./Lists/gbif/Arachnida_gbifData_", Sys.Date(),".csv"), row.names = F)
-write.csv2(genus.gbif$data, paste0("./Lists/gbif/Arachnida_genusData_", Sys.Date(),".csv"), row.names = F)
+write.csv2(sp.gbif$data, paste0("./Lists/gbif/Amphibia_gbifData_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(genus.gbif$data, paste0("./Lists/gbif/Amphibia_genusData_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
 
 #####################
 # Distribution plot #
