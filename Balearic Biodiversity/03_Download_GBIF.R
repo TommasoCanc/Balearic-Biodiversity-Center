@@ -21,7 +21,7 @@ library(stringr)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/Amphibia_2023_03_15.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/FreshwaterFish_2023_03_15.csv", sep = ";")
 head(species.list)
 
 # Filter genus and species columns
@@ -173,7 +173,15 @@ for(i in 1:length(gen)){
 rm(acceptedName.check, tax_key, i, key)
 
 # Check if we have different genus compared to the original list
-unique(word(sp.gen$Taxa, 1)) %in% gen
+unique(unique(word(sp.gen$Taxa, 1)) %in% gen) # It has to be TRUE
+
+# Remove genus not present into the original list
+gen.remove <- unique(word(sp.gen$Taxa, 1))[unique(word(sp.gen$Taxa, 1)) %ni% gen]
+if(length(gen.remove) != 0){
+  sp.gen <- sp.gen[!grepl(paste(gen.remove, collapse="|"), sp.gen$Taxa), ]
+} else {
+  sp.gen
+}
 
 sp.gen <- sp.gen$Taxa
 genus.gbif <- list(info = data.frame(),
@@ -307,11 +315,11 @@ genus.gbif$data <- filter(genus.gbif$data, rowSums(is.na(genus.gbif$data)) != nc
 gbifInfo <- merge(sp.gbif$info, genus.gbif$info, by = "acceptedName", all = TRUE)
 
 # Save .csv
-write.csv2(gbifInfo, paste0("./Lists/gbif/Amphibia_gbifInfo_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
-write.csv2(genus.gbif$info, paste0("./Lists/gbif/Amphibia_genusInfo_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(gbifInfo, paste0("./Lists/gbif/FreshwaterFish_gbifInfo_", Sys.Date(),".csv"), row.names = F) # , fileEncoding = "macroman"
+write.csv2(genus.gbif$info, paste0("./Lists/gbif/FreshwaterFish_genusInfo_", Sys.Date(),".csv"), row.names = F)
 
-write.csv2(sp.gbif$data, paste0("./Lists/gbif/Amphibia_gbifData_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
-write.csv2(genus.gbif$data, paste0("./Lists/gbif/Amphibia_genusData_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(sp.gbif$data, paste0("./Lists/gbif/FreshwaterFish_gbifData_", Sys.Date(),".csv"), row.names = F)
+write.csv2(genus.gbif$data, paste0("./Lists/gbif/FreshwaterFish_genusData_", Sys.Date(),".csv"), row.names = F)
 
 #####################
 # Distribution plot #

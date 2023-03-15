@@ -20,7 +20,7 @@ library(stringr)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/Amphibia_2023_03_15.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/FreshwaterFish_2023_03_15.csv", sep = ";")
 head(species.list)
 
 # Filter genus and species columns
@@ -175,15 +175,23 @@ sp.gen$nWords <- str_count(sp.gen$Taxa, "\\w+")
 
 # We need to remove all the taxa with sp.gen$nWord = 1
 sp.ge.one <- sp.gen[sp.gen$nWords == 1, ]
-sp.gen <- sp.gen[!grepl(paste(sp.ge.one$Taxa, collapse="|"), sp.gen$Taxa), ]
+if(nrow(sp.ge.one) != 0){
+  sp.gen <- sp.gen[!grepl(paste(sp.ge.one$Taxa, collapse="|"), sp.gen$Taxa), ]
+} else {
+  sp.gen
+}
 
 # Check if we have different genus compared to the original list
-unique(word(sp.gen$Taxa, 1)) %in% gen
+unique(unique(word(sp.gen$Taxa, 1)) %in% gen) # It has to be TRUE
 
 # Remove genus not present into the original list
 gen.remove <- unique(word(sp.gen$Taxa, 1))[unique(word(sp.gen$Taxa, 1)) %ni% gen]
-sp.gen <- sp.gen[!grepl(paste(gen.remove, collapse="|"), sp.gen$Taxa), ]
-
+  if(length(gen.remove) != 0){
+    sp.gen <- sp.gen[!grepl(paste(gen.remove, collapse="|"), sp.gen$Taxa), ]
+  } else {
+    sp.gen
+  }
+      
 # Remove rows with just one word
 # sp.gen <- sp.gen[sp.gen$nWords != 1, ]
 
@@ -278,7 +286,7 @@ faunaEuropaea <- merge(taxa.distribution, genus.distribution.pa, by="taxa.fauna.
   distinct()
 
 # Save .csv
-write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/Amphibia_faunaEuropaea_", Sys.Date(),".csv"), row.names = F)
-write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/Amphibia_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F)
+write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/FreshwaterFish_faunaEuropaea_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/FreshwaterFish_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
 
 rm(list = ls())
