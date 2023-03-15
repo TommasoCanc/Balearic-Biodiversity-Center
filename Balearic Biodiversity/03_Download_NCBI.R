@@ -50,7 +50,6 @@ a <- entrez_search(db = dataBase, term = term, retmax = a$count, use_history = T
 # Metadata info catch
 ncbiInfo <- data.frame()
 nucleotideFasta <- data.frame()
-colnames(nucleotideFasta)
 
 length(a$ids)
 for(i in 1:20){
