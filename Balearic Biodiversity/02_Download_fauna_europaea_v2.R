@@ -12,12 +12,15 @@ library(purrr)
 library(rvest)
 library(stringr)
 
+# Function
+"%ni%" <- Negate("%in%")
+
 # Set WD
 # setwd("/home/tcanc/OneDrive/Biodiversidad Baleares/Tom/")
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/Arachnida_2023_02_28.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/Amphibia_2023_03_15.csv", sep = ";")
 head(species.list)
 
 # Filter genus and species columns
@@ -164,7 +167,6 @@ for(i in 1:length(gen)) {
   print(paste(i, "--- of ---", length(gen)))
   
 } 
-
 rm(body, body.1, gen.ls, gen.ls.1, simple, simple.1, 
    sp.gen.1, gen.sub, gen.taxonName, gen.taxonName.1, i, j, nPages)
 
@@ -173,7 +175,14 @@ sp.gen$nWords <- str_count(sp.gen$Taxa, "\\w+")
 
 # We need to remove all the taxa with sp.gen$nWord = 1
 sp.ge.one <- sp.gen[sp.gen$nWords == 1, ]
-sp.gen.1 <- sp.gen[!grepl(paste(sp.ge.one$Taxa, collapse="|"), sp.gen$Taxa), ]
+sp.gen <- sp.gen[!grepl(paste(sp.ge.one$Taxa, collapse="|"), sp.gen$Taxa), ]
+
+# Check if we have different genus compared to the original list
+unique(word(sp.gen$Taxa, 1)) %in% gen
+
+# Remove genus not present into the original list
+gen.remove <- unique(word(sp.gen$Taxa, 1))[unique(word(sp.gen$Taxa, 1)) %ni% gen]
+sp.gen <- sp.gen[!grepl(paste(gen.remove, collapse="|"), sp.gen$Taxa), ]
 
 # Remove rows with just one word
 # sp.gen <- sp.gen[sp.gen$nWords != 1, ]
@@ -262,14 +271,14 @@ genus.distribution.pa <- genus.distribution[genus.distribution$Status == "presen
   filter_all(any_vars(!is.na(.))) # Remove rows fill only with NA values
 
 genus.distribution.p$source <- "Genus derived"
-# genus.distribution.pa$source <- "Genus derived"
+
 
 # Check difference between original list and genus temporary list
 faunaEuropaea <- merge(taxa.distribution, genus.distribution.pa, by="taxa.fauna.eu", all = T) %>%
   distinct()
 
 # Save .csv
-write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/Arachnida_faunaEuropaea_", Sys.Date(),".csv"), row.names = F)
-write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/Arachnida_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F)
+write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/Amphibia_faunaEuropaea_", Sys.Date(),".csv"), row.names = F)
+write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/Amphibia_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F)
 
 rm(list = ls())
