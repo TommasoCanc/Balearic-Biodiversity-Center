@@ -20,7 +20,7 @@ library(stringr)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/FreshwaterFish_2023_03_15.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/Reptilia_2023_03_17.csv", sep = ";")
 head(species.list)
 
 # Filter genus and species columns
@@ -280,13 +280,12 @@ genus.distribution.pa <- genus.distribution[genus.distribution$Status == "presen
 
 genus.distribution.p$source <- "Genus derived"
 
-
 # Check difference between original list and genus temporary list
 faunaEuropaea <- merge(taxa.distribution, genus.distribution.pa, by="taxa.fauna.eu", all = T) %>%
   distinct()
 
 # Save .csv
-write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/FreshwaterFish_faunaEuropaea_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
-write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/FreshwaterFish_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/Reptilia_faunaEuropaea_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/Reptilia_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
 
 rm(list = ls())

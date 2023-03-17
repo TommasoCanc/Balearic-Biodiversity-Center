@@ -1,5 +1,5 @@
 ######################################
-# Title: GBIF download,              #
+# Title: GBIF download               #
 # Author: Tommaso Cancellario        #
 # Reviewer:                          #
 # Creation: 2023 - 02 - 21           #
