@@ -27,8 +27,9 @@ sp.list <- data.frame()
 
 for(i in 1:length(sp)){
   
+  # Skip the error 404
   tryCatch({ 
-    #open connection to url 
+    # Open connection to url 
     acceptedName <- synonyms(sci_id = sp[i], db = "itis")[[1]]
     }, error = function(e){}
     )
@@ -44,6 +45,8 @@ for(i in 1:length(sp)){
     
   } else {
     
+    # If acceptedName is not a dataframe is an NA value and it happens when 
+    # no names is found in ITIS database
     sp.list.1 <- data.frame(originalName = sp[i],
                             acceptedName = ifelse(is.data.frame(acceptedName), "", "Not found"))
     
@@ -51,8 +54,9 @@ for(i in 1:length(sp)){
     sp.list <- rbind(sp.list, sp.list.1)
     rm(acceptedName)
   } else {
+    # If the error 404 happen "no data" values is produced
     sp.list.1 <- data.frame(originalName = sp[i],
-                            acceptedName = NA)
+                            acceptedName = "Not data")
     sp.list <- rbind(sp.list, sp.list.1)
   }
   
@@ -62,6 +66,3 @@ for(i in 1:length(sp)){
 
 # Save .csv
 write.csv2(sp.list, paste0("./Lists/01_TaxonomyCheck/Reptilia_taxonomyCheck_", Sys.Date(),".csv"), row.names = F)
-
-
-  

@@ -1,15 +1,17 @@
 ## Pipeline Balearic Biodiversity data.
 
-1. Create a ***NEW*** .csv file with the information contained in the original list for each group changing the columns' name as follow: "Taxon", "Family", and "Group". Hereafter: **newList**
+1. Create a ***NEW*** .csv file with the information contained in the original list. For each group changing the columns' name as follow: "Taxon", "Family", and "Group". Hereafter: **newList**
 
-2. Check original taxonomy and remove unnecessary words like subgenus or similar.
+2. Check taxonomy and remove unnecessary words like subgenus or similar.
 
    
-
    ### Resolve taxonomic name
 
-   
+3. To check synonyms and use updated taxonomy, use the script: *01_Taxonomic_check.R*.
+We use the function of the *taxize* R package to search for possible synonyms. The result is a data frame with two columns: the first with the original name and the second with the possible synonyms. If the value "Not found" is in the second column, it means that the function did not find the record in the reference database, whereas if the value is "No data", the error 404 was skipped in the function *synonyms*.
 
+4. Once we have the revised taxonomic list obtained with *point 3*, we can compare the latter with the original list and correct synonym names. 
+If there are "No data" or "Not found" values in the reviewed lit, we need to revise the taxonomy manually.
    
 
    ### Check taxa distribution
