@@ -25,13 +25,12 @@ sp <- as.character(species.list$Taxon)
 # Check for synonyms
 sp.list <- data.frame()
 
-for(i in 74:length(sp)){
+for(i in 1:length(sp)){
   
   tryCatch({ 
     #open connection to url 
     acceptedName <- synonyms(sci_id = sp[i], db = "itis")[[1]]
-    }, error = function(e){sp.list.1 <- data.frame(originalName = sp[i],
-                                                   acceptedName = "")}
+    }, error = function(e){}
     )
   
   if(exists("acceptedName")) {
@@ -46,15 +45,19 @@ for(i in 74:length(sp)){
   } else {
     
     sp.list.1 <- data.frame(originalName = sp[i],
-                            acceptedName = ifelse(!is.na(acceptedName), "", "Not found"))
+                            acceptedName = ifelse(is.data.frame(acceptedName), "", "Not found"))
     
   } 
+    sp.list <- rbind(sp.list, sp.list.1)
+    rm(acceptedName)
+  } else {
+    sp.list.1 <- data.frame(originalName = sp[i],
+                            acceptedName = NA)
+    sp.list <- rbind(sp.list, sp.list.1)
   }
   
-  
-  sp.list <- rbind(sp.list.1, sp.list)
   print(paste(i, "--- of ---", length(sp)))
-  rm(acceptedName)
+
 }
 
 # Save .csv
