@@ -28,6 +28,9 @@ sp.list <- data.frame()
 for(i in 1:length(sp)){
   
   acceptedName <- synonyms(sci_id = sp[i], db = "itis")[[1]]
+  
+  
+  if(exists("acceptedName")) {
   if("acc_name" %in% colnames(acceptedName)){
     
     acceptedName <- select(acceptedName, acc_name) %>% 
@@ -41,11 +44,17 @@ for(i in 1:length(sp)){
     sp.list.1 <- data.frame(originalName = sp[i],
                             acceptedName = "")
     
+  } 
+  } else {
+    
+    sp.list.1 <- data.frame(originalName = sp[i],
+                            acceptedName = "")
+    
   }
   
   sp.list <- rbind(sp.list.1, sp.list)
   print(paste(i, "--- of ---", length(sp)))
-  
+  rm(acceptedName)
 }
 
 # Save .csv
