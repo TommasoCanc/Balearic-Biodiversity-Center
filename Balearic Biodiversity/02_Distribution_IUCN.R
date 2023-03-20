@@ -10,7 +10,6 @@
 library(dplyr)
 library(rredlist)
 
-
 # Set WD
 # setwd("/home/tcanc/OneDrive/Biodiversidad Baleares/Tom/")
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
@@ -45,4 +44,4 @@ for(i in 1:length(sp)){
   print(paste(i, "--- of ---", length(sp)))
 }
 
-write.csv2(sp.native,)
+write.csv2(sp.native, paste0("./Lists/IUCN/Reptilia_IUCN_", Sys.Date(),".csv"), row.names = F)
