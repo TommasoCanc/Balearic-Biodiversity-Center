@@ -1,30 +1,33 @@
 ## Pipeline Balearic Biodiversity data.
 
-1. Download .xlsx data for each group.
+1. Create a ***NEW*** .csv file with the information contained in the original list for each group changing the columns' name as follow: "Taxon", "Family", and "Group". Hereafter: **newList**
 
-2. Change the columns' name as follow: "Taxon", "Family", and "Group".
-
-3. Check original taxonomy and remove unnecessary words like subgenus or similar.
+2. Check original taxonomy and remove unnecessary words like subgenus or similar.
 
    
 
-   ### Taxa distribution
+   ### Resolve taxonomic name
 
-4. Check species distribution. We want only the *NATIVE* species of Balearic Islands. To do that we use the IUCN information.
+   
+
+   
+
+   ### Check taxa distribution
+
+3. In the final checklist, we want only the *NATIVE* species of Balearic Islands. To do that we use the IUCN information.
 
    - Run the script **01_Distribution_IUCN.R**.
 
    - Check the countries obtained as results.
 
-   - Remove the species with improbable distribution.
+   - Remove the species with improbable distribution in the file created in the **newList**.
 
-     ***NOTE:*** Species with NA values are tho with no information in the IUCN web.
+     ***NOTE:*** Species with NA values are tho with no information in the IUCN web. Taxa without spatial information have to be checked manually.
 
-   
 
-5. Create a .xlsx file to contain the original list, the data downloaded from Fauna Europaea and those downloaded from GBIF. (XXX_finalList_YYYY_MM_DD).
+4. Create a .xlsx file to contain the original list, the data downloaded from Fauna Europaea and those downloaded from GBIF. (XXX_finalList_YYYY_MM_DD).
 
-6. Count the number of words to verify the presence of subspecies or higher taxonomic levels. = LEN(TRIM(A2))-LEN(SUBSTITUTE(A2;" ";""))+1
+1. Count the number of words to verify the presence of subspecies or higher taxonomic levels. = LEN(TRIM(A2))-LEN(SUBSTITUTE(A2;" ";""))+1
 
    
 
@@ -55,7 +58,7 @@ Apply to such column 3 conditional formatting:
 GBIF DOWNLOAD INFO
 11)	Download spatial information stored in GBIF (https://www.gbif.org)
 -	Run the first chunk R script 03_Download_gbif.R to download the occurrences of the taxa based on the original list. 
-This script produces an R list composed of two objects:
+	This script produces an R list composed of two objects:
 	- info: Contains information about species name, scientific name, GBIF taxon key, taxonomic status (e.g., synonym, accepted), number of occurrences in Spain, and number of occurrences in the Balearic Islands. The last column presenceAbsence is derived from the number of Balearic occurrences. If >= 5 the species is considered present, otherwise not.
 	- data: Contains spatial information, occurrence sampling events and institution info.
 - Run the second chunk of the script. As for Fauna Europaea, we retrieve the species starting from the genus. Also in this case, we produce a list containing the objects: info and data.
