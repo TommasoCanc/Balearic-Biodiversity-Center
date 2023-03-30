@@ -4,44 +4,48 @@
 
 2. Check taxonomy and remove unnecessary words like subgenus or similar.
 
-   
+
    ### Resolve taxonomic name
 
-3. To check synonyms and use updated taxonomy, use the script: *01_Taxonomic_check.R*.
-We use the function of the *taxize* R package to search for possible synonyms. The result is a data frame with two columns: the first with the original name and the second with the possible synonyms. If the value "Not found" is in the second column, it means that the function did not find the record in the reference database, whereas if the value is "No data", the error 404 was skipped in the function *synonyms*.
+3. To check synonyms and use updated taxonomy, we use the script: *01_Taxonomic_check.R*.
+We use the function *synonyms* from the *taxize* package to search for possible synonyms. The result is a data frame with two columns: the first with the original name and the second with the possible synonyms. If the value "Not found" is in the second column, it means that the function did not find the record in the reference database, whereas if the value is "No data", the error 404 was skipped in the function *synonyms*.
 
 4. Once we have the revised taxonomic list obtained with *point 3*, we can compare the latter with the original list and correct synonym names. 
 If there are "No data" or "Not found" values in the reviewed lit, we need to revise the taxonomy manually.
-   
+
+Databases uded for synonyms check
+
+|   |   |
+|   |   |
+|   |   |
+|   |   |
+|   |   |   
 
    ### Check taxa distribution
 
-3. In the final checklist, we want only the *NATIVE* species of Balearic Islands. To do that we use the IUCN information.
+5. Once we have a good taxonomy list, we need to check each species' distribution to remove those taxa outside their native range. To do that, we use the script *01_Distribution_IUCN.R*.
+The result of this script is a data frame containing the native range of each species retrieved from IUCN information.
 
-   - Run the script **01_Distribution_IUCN.R**.
+Species with a native range out of Spain have to be removed from the original list.
+Classify the species present in Spain with the label **"present"** whereas the species out of the range with the labe **"absent"**.
 
-   - Check the countries obtained as results.
-
-   - Remove the species with improbable distribution in the file created in the **newList**.
-
-     ***NOTE:*** Species with NA values are tho with no information in the IUCN web. Taxa without spatial information have to be checked manually.
-
-
-4. Create a .xlsx file to contain the original list, the data downloaded from Fauna Europaea and those downloaded from GBIF. (XXX_finalList_YYYY_MM_DD).
-
-1. Count the number of words to verify the presence of subspecies or higher taxonomic levels. = LEN(TRIM(A2))-LEN(SUBSTITUTE(A2;" ";""))+1
-
+   ***NOTE:*** Species with NA values in the IUCN .csv file do not have information in the IUCN web. Taxa without spatial information have to be checked manually.
    
+   
+   ### Fauna Europaea download
 
-### 	FAUNA EUROPAEA DOWNLOAD INFO
+6. With the species list obtained after checked the species distribution, we can download the information stored in Fauna Europaea (https://fauna-eu.org). To the scope, we use the script *03_Download_fauna_europaea_v2.R*. In this case we can obtain the distribution for Balearic islands. In Fauna Europaea the Balearic Islands are identified as *Balearic Is.*.
 
-6)	Download spatial information stored in Fauna Europaea (https://fauna-eu.org)
+
+
+
+8.			Download spatial information stored in Fauna Europaea 
 -	Run the first chunk R script 02_Download_fauna_europaea.R to download the regional distribution of each taxon based on the original list.
 -	Run the second chunk of the script to retrieve all the species belonging to a specific genus. Then this new list is the base for retrieving information about the distribution of the species.
-7)	Save two .csv files. 
+9)	Save two .csv files. 
 -	The first one contains the merged result between the original list and that originated starting from the Genus.
 -	The second one contains the presence/absence information derived from the list of taxa originating from the Genus. This file helps check the doubtful presence.
-8)	Copy and paste the information in the XXX_finalList_YYYY_MM_DD; sheet  faunaEuropaea.
+10)	Copy and paste the information in the XXX_finalList_YYYY_MM_DD; sheet  faunaEuropaea.
 
 NOTE: If you have a record from the original list saved with NA and the same record is present in the table derived by the genus, this is a new record compared to the original list.
 

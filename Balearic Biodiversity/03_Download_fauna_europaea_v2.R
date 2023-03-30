@@ -20,8 +20,11 @@ library(stringr)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/Reptilia_2023_03_17.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/Reptilia_2023_03_17_reviewed.csv", sep = ";")
 head(species.list)
+
+# Remove species not present in Spain
+species.list <- species.list[species.list$Presence == "present", ]
 
 # Filter genus and species columns
 sp <- as.character(species.list$Taxon)
@@ -37,7 +40,7 @@ gen <- unique(word(sp, 1))
 taxa.distribution <- data.frame()
 
 for(i in 1:length(sp)) {
-sp.sub <-gsub(" ", "+", sp[i])
+sp.sub <- gsub(" ", "+", sp[i])
 
 # Link with species name
 simple <- read_html(paste0("https://fauna-eu.org/cdm_dataportal/search/results/taxon?ws=portal%2Ftaxon%2Ffind&query=", sp.sub,"&form_build_id=form-yCUOMbyaOrUypUfzCmfYy_S4qRO0OaqCMcOThvnkGJY&form_id=cdm_dataportal_search_taxon_form&search%5BdoTaxaByCommonNames%5D=&search%5BdoSynonyms%5D=&search%5BdoTaxa%5D=1&search%5BpageSize%5D=25&search%5BpageNumber%5D=0"))
@@ -191,9 +194,6 @@ gen.remove <- unique(word(sp.gen$Taxa, 1))[unique(word(sp.gen$Taxa, 1)) %ni% gen
   } else {
     sp.gen
   }
-      
-# Remove rows with just one word
-# sp.gen <- sp.gen[sp.gen$nWords != 1, ]
 
 # Download distribution information starting from the species derived form the genus
 sp <- as.character(sp.gen$Taxa)
@@ -285,7 +285,7 @@ faunaEuropaea <- merge(taxa.distribution, genus.distribution.pa, by="taxa.fauna.
   distinct()
 
 # Save .csv
-write.csv2(faunaEuropaea, paste0("./Lists/faunaEuropaea/Reptilia_faunaEuropaea_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
-write.csv2(genus.distribution.pa, paste0("./Lists/faunaEuropaea/Reptilia_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(faunaEuropaea, paste0("./Lists/03_faunaEuropaea/Reptilia_faunaEuropaea_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
+write.csv2(genus.distribution.pa, paste0("./Lists/03_faunaEuropaea/Reptilia_faunaEuropaea_pa_", Sys.Date(),".csv"), row.names = F, fileEncoding = "macroman")
 
 rm(list = ls())

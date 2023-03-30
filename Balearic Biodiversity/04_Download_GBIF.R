@@ -21,8 +21,11 @@ library(stringr)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/FreshwaterFish_2023_03_15.csv", sep = ";")
+species.list <- read.csv("./Lists/originalList/Reptilia_2023_03_17_reviewed.csv", sep = ";")
 head(species.list)
+
+# Remove species not present in Spain
+species.list <- species.list[species.list$IUCN.Presence == "present", ]
 
 # Filter genus and species columns
 sp <- as.character(species.list$Taxon)
@@ -315,11 +318,11 @@ genus.gbif$data <- filter(genus.gbif$data, rowSums(is.na(genus.gbif$data)) != nc
 gbifInfo <- merge(sp.gbif$info, genus.gbif$info, by = "acceptedName", all = TRUE)
 
 # Save .csv
-write.csv2(gbifInfo, paste0("./Lists/gbif/FreshwaterFish_gbifInfo_", Sys.Date(),".csv"), row.names = F) # , fileEncoding = "macroman"
-write.csv2(genus.gbif$info, paste0("./Lists/gbif/FreshwaterFish_genusInfo_", Sys.Date(),".csv"), row.names = F)
+write.csv2(gbifInfo, paste0("./Lists/04_gbif/Reptili_gbifInfo_", Sys.Date(),".csv"), row.names = F) # , fileEncoding = "macroman"
+write.csv2(genus.gbif$info, paste0("./Lists/04_gbif/Reptili_genusInfo_", Sys.Date(),".csv"), row.names = F)
 
-write.csv2(sp.gbif$data, paste0("./Lists/gbif/FreshwaterFish_gbifData_", Sys.Date(),".csv"), row.names = F)
-write.csv2(genus.gbif$data, paste0("./Lists/gbif/FreshwaterFish_genusData_", Sys.Date(),".csv"), row.names = F)
+write.csv2(sp.gbif$data, paste0("./Lists/04_gbif/Reptili_gbifData_", Sys.Date(),".csv"), row.names = F)
+write.csv2(genus.gbif$data, paste0("./Lists/04_gbif/Reptili_genusData_", Sys.Date(),".csv"), row.names = F)
 
 #####################
 # Distribution plot #
