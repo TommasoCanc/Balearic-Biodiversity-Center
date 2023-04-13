@@ -28,6 +28,20 @@ Databases used for taxonomic check
 | Reptilia           | ITIS             |
 |                    |                  |
 
+#### Higher taxonomy rank
+
+5. We use the script *02_higherTaxonomy* to complete the higher taxonomic rank for each taxon.
+
+
+Databases used for retrieve higher taxonomic rank
+
+| Reference database | Biological group |
+|--------------------|------------------|
+| Reptilia           | ITIS             |
+|                    |                  |
+
+
+
    ### Check taxa distribution
 
 5. Once we have a good taxonomy list, we need to check each species' distribution to remove those taxa outside their native range. To do that, we use the script *01_Distribution_IUCN.R*.

@@ -15,7 +15,7 @@ library(taxize)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/01_TaxonomyCheck/Reptilia_taxonomyCheck_2023-03-20_REVIEWED.csv", sep = ";")
+species.list <- read.csv("./Lists/02_taxonomyCheck/Reptilia_taxonomyCheck_2023-04-13_REVIEWED.csv", sep = ";")
 head(species.list)
 
 # Filter genus and species columns
@@ -23,8 +23,8 @@ sp <- as.character(species.list$originalName)
 
 taxon.cl <- data.frame()
 
-# Search in ITIS
-for(i in 77:length(sp)){
+# Search in ITIS (aggiungere original name)
+for(i in 1:length(sp)){
   
   
   tryCatch(cl <- classification(sci_id = sp[i], db = "itis")[[1]], error=function(e){})
@@ -37,7 +37,8 @@ for(i in 77:length(sp)){
         filter(tsn == cl$id[cl$rank == last(cl$rank)])
       scientificName <- paste(scientificName$scientificName, scientificName$author)
       
-      taxon.cl.1 <- data.frame(kingdom = ifelse("kingdom" %in% cl$rank, cl$name[cl$rank == "kingdom"], NA),
+      taxon.cl.1 <- data.frame(originalName = sp[i],
+                               kingdom = ifelse("kingdom" %in% cl$rank, cl$name[cl$rank == "kingdom"], NA),
                                phylum = ifelse("phylum" %in% cl$rank, cl$name[cl$rank == "phylum"], NA),
                                class = ifelse("class" %in% cl$rank, cl$name[cl$rank == "class"], NA),
                                order = ifelse("order" %in% cl$rank, cl$name[cl$rank == "order"], NA),
@@ -51,7 +52,8 @@ for(i in 77:length(sp)){
       
     } else {
       # If not found in ITIS 
-      taxon.cl.1 <- data.frame(kingdom = NA,
+      taxon.cl.1 <- data.frame(originalName = sp[i],
+                               kingdom = NA,
                                phylum = NA,
                                class = NA,
                                order = NA,
@@ -67,7 +69,8 @@ for(i in 77:length(sp)){
     
   } else {
     
-    taxon.cl.1 <- data.frame(kingdom = NA,
+    taxon.cl.1 <- data.frame(originalName = sp[i],
+                             kingdom = NA,
                              phylum = NA,
                              class = NA,
                              order = NA,
@@ -83,4 +86,7 @@ for(i in 77:length(sp)){
   
   print(paste(i, "----", length(sp), "----"))
   rm(cl)
-  }
+}; rm(taxon.cl.1, i, scientificName)
+
+# Save . csv
+write.csv(taxon.cl, paste0("./Lists/03_higherTaxonomy/Reptilia_higherTaxonomy_", Sys.Date(),".csv"), row.names = FALSE)
