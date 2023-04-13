@@ -23,29 +23,64 @@ sp <- as.character(species.list$originalName)
 
 taxon.cl <- data.frame()
 
-for(i in 1:length(sp)){
+# Search in ITIS
+for(i in 77:length(sp)){
   
-  cl <- classification(sp[i], db = "itis")[[1]]
   
-  scientificName <- itis_terms(sp[i]) %>% 
-    filter(tsn == cl$id[cl$rank == "species"])
-  scientificName <- paste(scientificName$scientificName, scientificName$author)
+  tryCatch(cl <- classification(sci_id = sp[i], db = "itis")[[1]], error=function(e){})
   
-  taxon.cl.1 <- data.frame(kingdom = cl$name[cl$rank == "kingdom"],
-                           phylum = cl$name[cl$rank == "phylum"],
-                           class = cl$name[cl$rank == "class"],
-                           order = cl$name[cl$rank == "order"],
-                           family = cl$name[cl$rank == "family"],
-                           genus = cl$name[cl$rank == "genus"],
-                           species = cl$name[cl$rank == "species"],
-                           scientificName = scientificName)
+  if(exists("cl")){
+    
+    if(all(!is.na(cl))){
+      
+      scientificName <- itis_terms(sp[i]) %>% 
+        filter(tsn == cl$id[cl$rank == last(cl$rank)])
+      scientificName <- paste(scientificName$scientificName, scientificName$author)
+      
+      taxon.cl.1 <- data.frame(kingdom = ifelse("kingdom" %in% cl$rank, cl$name[cl$rank == "kingdom"], NA),
+                               phylum = ifelse("phylum" %in% cl$rank, cl$name[cl$rank == "phylum"], NA),
+                               class = ifelse("class" %in% cl$rank, cl$name[cl$rank == "class"], NA),
+                               order = ifelse("order" %in% cl$rank, cl$name[cl$rank == "order"], NA),
+                               family = ifelse("family" %in% cl$rank, cl$name[cl$rank == "family"], NA),
+                               genus = ifelse("genus" %in% cl$rank, cl$name[cl$rank == "genus"], NA),
+                               species = ifelse("species" %in% cl$rank, cl$name[cl$rank == "species"], NA),
+                               subspecies = ifelse("subspecies" %in% cl$rank, cl$name[cl$rank == "subspecies"], NA),
+                               scientificName = scientificName)
+      
+      taxon.cl <- rbind(taxon.cl, taxon.cl.1)
+      
+    } else {
+      # If not found in ITIS 
+      taxon.cl.1 <- data.frame(kingdom = NA,
+                               phylum = NA,
+                               class = NA,
+                               order = NA,
+                               family = NA,
+                               genus = NA,
+                               species = NA,
+                               subspecies = NA,
+                               scientificName = sp[i])
+      
+      taxon.cl <- rbind(taxon.cl, taxon.cl.1)
+      
+    }
+    
+  } else {
+    
+    taxon.cl.1 <- data.frame(kingdom = NA,
+                             phylum = NA,
+                             class = NA,
+                             order = NA,
+                             family = NA,
+                             genus = NA,
+                             species = NA,
+                             subspecies = NA,
+                             scientificName = sp[i])
+    
+    taxon.cl <- rbind(taxon.cl, taxon.cl.1)
+    
+  }
   
-  taxon.cl <- rbind(taxon.cl, taxon.cl.1)
-  
-}
-
-
-
-
-
-
+  print(paste(i, "----", length(sp), "----"))
+  rm(cl)
+  }

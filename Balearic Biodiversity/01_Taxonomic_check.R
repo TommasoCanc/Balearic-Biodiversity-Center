@@ -65,4 +65,4 @@ for(i in 1:length(sp)){
 }
 
 # Save .csv
-write.csv2(sp.list, paste0("./Lists/01_TaxonomyCheck/Reptilia_taxonomyCheck_", Sys.Date(),".csv"), row.names = F)
+write.csv(sp.list, paste0("./Lists/02_taxonomyCheck/Reptilia_taxonomyCheck_", Sys.Date(),".csv"), row.names = F)

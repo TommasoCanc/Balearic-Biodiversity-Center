@@ -1,25 +1,32 @@
 ## Pipeline Balearic Biodiversity data.
 
-1. Create a ***NEW*** .csv file with the information contained in the original list. For each group changing the columns' name as follow: "Taxon", "Family", and "Group". Hereafter: **newList**
+1. Create a ***NEW*** .csv file starting from the original list changing the columns' name as follow: "Taxon", "Family", and "Group". Hereafter: **newList**
 
-2. Check taxonomy and remove unnecessary words like subgenus or similar.
+2. Check nomenclature removing unnecessary words like subgenus, gr., etc.
+
+    📁 Save in **01_originalList**
+
+#### Resolve binomial nomenclature
+
+3. We use the script: *01_Taxonomic_check.R* to resolve synonyms.
+We use the function `synonyms` from the *taxize* R package to search for synonym names. The resulting object is a data frame with two columns: 
+**i)** the name stored in the original data set; **ii)** the accepted name if the original name is a synonym. 
+
+> _**NOTE**_: The "Not found" string in the second column means that the binomial name is absent from the reference database. Whereas the sting "No data" means that the `synonyms` function returned the error 404, and the query of the binomial name was skipped.
+
+4. Once we obtain the reviewed taxonomic list (*point 3*), we can manually correct the original list.
+
+    📁 Save in **02_taxonomyCheck**
+
+ > _**NOTE**_: Data with "Not found" or "No data" strings have to be searched manually.
 
 
-   ### Resolve taxonomic name
+Databases used for taxonomic check
 
-3. To check synonyms and use updated taxonomy, we use the script: *01_Taxonomic_check.R*.
-We use the function *synonyms* from the *taxize* package to search for possible synonyms. The result is a data frame with two columns: the first with the original name and the second with the possible synonyms. If the value "Not found" is in the second column, it means that the function did not find the record in the reference database, whereas if the value is "No data", the error 404 was skipped in the function *synonyms*.
-
-4. Once we have the revised taxonomic list obtained with *point 3*, we can compare the latter with the original list and correct synonym names. 
-If there are "No data" or "Not found" values in the reviewed lit, we need to revise the taxonomy manually.
-
-Databases uded for synonyms check
-
-|   |   |
-|   |   |
-|   |   |
-|   |   |
-|   |   |   
+| Reference database | Biological group |
+|--------------------|------------------|
+| Reptilia           | ITIS             |
+|                    |                  |
 
    ### Check taxa distribution
 
