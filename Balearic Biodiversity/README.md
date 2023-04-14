@@ -32,6 +32,9 @@ Databases used for taxonomic check
 
 5. We use the script *02_higherTaxonomy* to complete the higher taxonomic rank for each taxon.
 
+      📁 Save in **03_higherTaxonomy**
+
+> _**NOTE**_: Data with NA values in the columns _kingdom_,	_phylum_, _class_, _order_, _family_, _genus_, _species_, and _subspecies_ have to be searched manually because they are not present in the reference database.
 
 Databases used for retrieve higher taxonomic rank
 
@@ -40,20 +43,26 @@ Databases used for retrieve higher taxonomic rank
 | Reptilia           | ITIS             |
 |                    |                  |
 
+#### Check taxa distribution
 
+6. We need to check each species' distribution to remove those taxa outside their native range. To do that, we use the script *03_distributionIUCN.R*.
+      The result of this script is a data frame containing the native range of each species retrieved from IUCN at Spanish level. Species with a native range out of Spain have to be flagged and finally they will remove from the final checklist.
 
-   ### Check taxa distribution
+7. We need to add a column in the .csv **higher taxonomy** to include the IUCN flags.
 
-5. Once we have a good taxonomy list, we need to check each species' distribution to remove those taxa outside their native range. To do that, we use the script *01_Distribution_IUCN.R*.
-The result of this script is a data frame containing the native range of each species retrieved from IUCN information.
+**Column name**: iucnDistribution
+**Flags**: i) present; ii) absent
 
-Species with a native range out of Spain have to be removed from the original list.
-Classify the species present in Spain with the label **"present"** whereas the species out of the range with the labe **"absent"**.
-
-   ***NOTE:*** Species with NA values in the IUCN .csv file do not have information in the IUCN web. Taxa without spatial information have to be checked manually.
+ > _**NOTE**_: Species with NA values do not have information in the IUCN web. Thus we have to be checked manually.
    
+   👉 _**Tip**_: We can follow these steps to add IUCN information easily:
+       * Filter the column _country_ for Spain to select the present taxa.
+       * Filter the column _country_ for NA to select the taxa with any information in IUCN.
+       * Filter the column _country_ excluding Spain and NA to select the absent taxa. If a taxon has been flagged as present (point 1) has to remain present since the taxon distribution is extended to many countries.   
    
-   ### Fauna Europaea download
+   📁 Save in **04_IUCN**
+   
+#### Fauna Europaea download
 
 6. With the species list obtained after checked the species distribution, we can download the information stored in Fauna Europaea (https://fauna-eu.org). To the scope, we use the script *03_Download_fauna_europaea_v2.R*. In this case we can obtain the distribution for Balearic islands. In Fauna Europaea the Balearic Islands are identified as *Balearic Is.*.
 
