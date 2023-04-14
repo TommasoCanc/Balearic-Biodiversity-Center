@@ -1,4 +1,7 @@
-## Pipeline Balearic Biodiversity data.
+# Pipeline to check the Balearic Biodiversity data.
+
+
+#### 1. Create starting checklist
 
 1. Create a ***NEW*** .csv file starting from the original list changing the columns' name as follow: "Taxon", "Family", and "Group". Hereafter: **newList**
 
@@ -6,7 +9,7 @@
 
     📁 Save in **01_originalList**
 
-#### Resolve binomial nomenclature
+#### 2. Resolve binomial nomenclature
 
 3. We use the script: *01_Taxonomic_check.R* to resolve synonyms.
 We use the function `synonyms` from the *taxize* R package to search for synonym names. The resulting object is a data frame with two columns: 
@@ -28,7 +31,7 @@ Databases used for taxonomic check
 | Reptilia           | ITIS             |
 |                    |                  |
 
-#### Higher taxonomy rank
+#### 3. Higher taxonomy rank
 
 5. We use the script *02_higherTaxonomy* to complete the higher taxonomic rank for each taxon.
 
@@ -43,7 +46,7 @@ Databases used for retrieve higher taxonomic rank
 | Reptilia           | ITIS             |
 |                    |                  |
 
-#### Check taxa distribution
+#### 4. Check taxa distribution
 
 6. We need to check each species' distribution to remove those taxa outside their native range. To do that, we use the script *03_distributionIUCN.R*.
       The result of this script is a data frame containing the native range of each species retrieved from IUCN at Spanish level. Species with a native range out of Spain have to be flagged and finally they will remove from the final checklist.
@@ -62,61 +65,47 @@ Databases used for retrieve higher taxonomic rank
    
    📁 Save in **04_IUCN**
    
-#### Fauna Europaea download
+#### 5. Fauna Europaea download
 
-6. With the species list obtained after checked the species distribution, we can download the information stored in Fauna Europaea (https://fauna-eu.org). To the scope, we use the script *03_Download_fauna_europaea_v2.R*. In this case we can obtain the distribution for Balearic islands. In Fauna Europaea the Balearic Islands are identified as *Balearic Is.*.
+6. We use the script _04_downloadFaunaEuropaea.R_ to download presence information from [Fauna europaea](https://fauna-eu.org) (FE). With this database, we can limit the species' presence to the Balearic Islands (info in FE _*Balearic Is.*_ ).
 
+To obtain a complete data set of the Balearic Islands' biodiversity, we also download the information concerning all the species belonging to the genera listed in our original list. Therefore as a final result of this script, we obtain two .csv files:
+i) _XXX_faunaEuropaea_DATE_: This file contains the merged information retrieved of the species presence starting from the taxa list and the presence of species retrieved using the genus as starting point.
+ii) _XXX_faunaEuropaea_pa_DATE_: This file contains information about the explicit absence or doubtful presence reported in FE.
 
+We need to add a column in the .csv **higher taxonomy** to include the FE information.
 
+**Column name**: faunaEuropaea
+**Flags**: i) present; ii) absent
 
-8.			Download spatial information stored in Fauna Europaea 
--	Run the first chunk R script 02_Download_fauna_europaea.R to download the regional distribution of each taxon based on the original list.
--	Run the second chunk of the script to retrieve all the species belonging to a specific genus. Then this new list is the base for retrieving information about the distribution of the species.
-9)	Save two .csv files. 
--	The first one contains the merged result between the original list and that originated starting from the Genus.
--	The second one contains the presence/absence information derived from the list of taxa originating from the Genus. This file helps check the doubtful presence.
-10)	Copy and paste the information in the XXX_finalList_YYYY_MM_DD; sheet  faunaEuropaea.
+   📁 Save in **05_faunaEuropaea**
 
-NOTE: If you have a record from the original list saved with NA and the same record is present in the table derived by the genus, this is a new record compared to the original list.
-
-Aeshna cyanea (Muller, 1764)	NA	NA	NA
+> _**NOTE**_: If exist a incongruence of presence information between the original and derived taxa, it means that we gain a new species for the Balearic Islands. 
+For example:
+Aeshna cyanea (Muller, 1764)	NA	NA	NA   Original list
 Aeshna cyanea (Muller, 1764)	Balearic Is.	Present	Genus derived
 
-NOTE: if the species have only NA values, the species is not present in the Fauna Europaea.
+If the species have only NA values, the species is not present in the Fauna Europaea thus need to be checked manually.
 
-9)	Create a conditional column “Status (xy)” containing this formula =IF(D2=H2;D2;"doubtful"). 
-Apply to such column 3 conditional formatting: 
-"doubtful" Yellow field;
-"absent" Red field;
-"present" Green field.
-10)	Carefully check the record and try to fill the empty or NA space.
 
-GBIF DOWNLOAD INFO
-11)	Download spatial information stored in GBIF (https://www.gbif.org)
--	Run the first chunk R script 03_Download_gbif.R to download the occurrences of the taxa based on the original list. 
-	This script produces an R list composed of two objects:
-	- info: Contains information about species name, scientific name, GBIF taxon key, taxonomic status (e.g., synonym, accepted), number of occurrences in Spain, and number of occurrences in the Balearic Islands. The last column presenceAbsence is derived from the number of Balearic occurrences. If >= 5 the species is considered present, otherwise not.
-	- data: Contains spatial information, occurrence sampling events and institution info.
-- Run the second chunk of the script. As for Fauna Europaea, we retrieve the species starting from the genus. Also in this case, we produce a list containing the objects: info and data.
-From both the objects we remove fossil specimens and those with 0 occurrences in Spain.
-12)	Save four .csv files.
--	The first contains merged information between the original list and that retrieved starting from the genus.
--	The second contains info retrieved from the species obtained using the genus as the base.
--	The third contains spatial information on the taxa of the original list.
--	The fourth contains spatial information derived from the taxa obtained from the genus.
-13)	 Copy and paste the information in the XXX_finalList_YYYY_MM_DD; sheet  gbif.
-14)	Create a conditional column “Status (xy)” containing this formula =IF(D2=H2;D2;"doubtful"). 
-Apply to such column 3 conditional formatting: 
-"doubtful" Yellow field;
-"absent" Red field;
-"present" Green field.
-15)	 Filter removing the taxa with 0 occurrences in column M.
-16)	Carefully check the record and try to fill the empty on NA space.
+#### 6. GBIF download 
 
-MERGE THE INFO
-17)	 In the originalist sheet add the columns: “bioatlas”; “faunaEuropaea”; “gbif”; “total”. 
-18)	 Fill the column bioatlas with the string “present”, since the original list was downloaded from bioatlas. Then, fill the other two columns using the function VLOOKUP.
-19)	Add a temporary column with the following formula: 
-=IF(OR(D2 <> "present"; E2 <> "present"; F2 <> "present"); "check"; "present").
-With this formula we consider a species present in the Balearic territory only if all the information sources agree with the present statement. If not we need to check. 
-20)	In the column “total” we can insert the sure presence. We consider the species absent if there are 2 or 3 absent values, or doubtful if there are two present and 1 absent/NA values.
+We use the script _05_downloadGBIF.R_ to download the presence information from Global Biodiversity Information Facility ([GBIF](https://www.gbif.org)). As for the FE, with use the same approach "genus base" to include the maximum number of species as possible. 
+
+To detect the taxa presence in the Balearic Islands, we use the number of occurrences included in the spatial polygon "POLYGON((0.898 38,4.592 38,4.592 40.295,0.898 40.295,0.898 38))". We consider a species as present if the number of occurrence is >= 5.
+
+The results of this script are two .csv files:
+i) _XXX_gbifData_DATE_: This file contain the global information retrieved from the taxa of he original list and that obtained from the genus base approach.
+ii) _XXX_gbifInfo_DATE_: This file contain data obrained only with the genus based approach.
+
+We need to add a column in the .csv **higher taxonomy** to include the GBIF information.
+
+**Column name**: gbif
+**Flags**: i) present; ii) absent
+
+📁 Save in **06_gbif
+
+ 👉 _**Tip**_: We can follow these steps to add IUCN information easily:
+       * Filter the column _country_ for Spain to select the present taxa.
+       * Filter the column _country_ for NA to select the taxa with any information in IUCN.
+       * Filter the column _country_ excluding Spain and NA to select the absent taxa. If a taxon has been flagged as present (point 1) has to remain present since the taxon distribution is extended to many countries.   
