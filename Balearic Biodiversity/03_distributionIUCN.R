@@ -15,11 +15,11 @@ library(rredlist)
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
 # Load species list
-species.list <- read.csv("./Lists/originalList/Reptilia_2023_03_17.csv", sep = ";")
+species.list <- read.csv("./Lists/03_higherTaxonomy/Reptilia_higherTaxonomy_2023-04-13.csv", sep = ",")
 head(species.list)
 
 # Filter taxa columns
-sp <- as.character(species.list$Taxon)
+sp <- as.character(species.list$originalName)
 
 sp.native <- data.frame()
 
@@ -42,6 +42,7 @@ for(i in 1:length(sp)){
   
   sp.native <- rbind(sp.native, sp.native.1)
   print(paste(i, "--- of ---", length(sp)))
-}
+}; rm(i, sp.native.1, native)
 
-write.csv2(sp.native, paste0("./Lists/IUCN/Reptilia_IUCN_", Sys.Date(),".csv"), row.names = F)
+# Save csv
+write.csv(sp.native, paste0("./Lists/04_IUCN/Reptilia_IUCN_", Sys.Date(),".csv"), row.names = F)

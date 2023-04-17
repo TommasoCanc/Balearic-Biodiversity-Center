@@ -20,15 +20,18 @@ library(stringr)
 # setwd("/home/tcanc/OneDrive/Biodiversidad Baleares/Tom/")
 setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/Tom/")
 
+# Set group name
+grName <- "Reptilia"
+
 # Load species list
-species.list <- read.csv("./Lists/originalList/Reptilia_2023_03_17_reviewed.csv", sep = ";")
+species.list <- read.csv("./Lists/03_higherTaxonomy/Reptilia_higherTaxonomy_2023-04-13.csv", sep = ";")
 head(species.list)
 
 # Remove species not present in Spain
-species.list <- species.list[species.list$IUCN.Presence == "present", ]
+# species.list <- species.list[species.list$IUCN.Presence == "present", ]
 
 # Filter genus and species columns
-sp <- as.character(species.list$Taxon)
+sp <- as.character(species.list$originalName)
 
 # Extract genus
 gen <- unique(word(sp, 1))
@@ -186,7 +189,7 @@ if(length(gen.remove) != 0){
   sp.gen
 }
 
-sp.gen <- sp.gen$Taxa
+# sp.gen <- sp.gen$Taxa
 genus.gbif <- list(info = data.frame(),
                    data = data.frame())
 
@@ -293,7 +296,6 @@ rm(tax_key, key, nOcc, dat_ne, info, i, acceptedScientificName, acceptedName.che
 tail(genus.gbif$info)
 tail(genus.gbif$data)
 
-
 # Remove fossil record from info and data files
 fossil.rm <- genus.gbif$data$acceptedScientificName[which(genus.gbif$data$basisOfRecord == "FOSSIL_SPECIMEN")]
 
@@ -318,33 +320,33 @@ genus.gbif$data <- filter(genus.gbif$data, rowSums(is.na(genus.gbif$data)) != nc
 gbifInfo <- merge(sp.gbif$info, genus.gbif$info, by = "acceptedName", all = TRUE)
 
 # Save .csv
-write.csv2(gbifInfo, paste0("./Lists/04_gbif/Reptili_gbifInfo_", Sys.Date(),".csv"), row.names = F) # , fileEncoding = "macroman"
-write.csv2(genus.gbif$info, paste0("./Lists/04_gbif/Reptili_genusInfo_", Sys.Date(),".csv"), row.names = F)
+dir.create(paste0("./Lists/06_gbif/", grName))
+write.csv(gbifInfo, paste0("./Lists/06_gbif/", grName, "/", grName, "_gbifInfo_", Sys.Date(),".csv"), row.names = F) # , fileEncoding = "macroman"
+write.csv(genus.gbif$info, paste0("./Lists/06_gbif/", grName, "/", grName, "_genusInfo_", Sys.Date(),".csv"), row.names = F)
+# write.csv(sp.gbif$data, paste0("./Lists/06_gbif/", grName, "/", grName, "_gbifData_", Sys.Date(),".csv"), row.names = F)
+# write.csv(genus.gbif$data, paste0("./Lists/06_gbif/", grName, "/", grName, "_genusData_", Sys.Date(),".csv"), row.names = F)
 
-write.csv2(sp.gbif$data, paste0("./Lists/04_gbif/Reptili_gbifData_", Sys.Date(),".csv"), row.names = F)
-write.csv2(genus.gbif$data, paste0("./Lists/04_gbif/Reptili_genusData_", Sys.Date(),".csv"), row.names = F)
-
-#####################
-# Distribution plot #
-#####################
-
-# Load Balearic shape file
-balearic.sp <- read_sf("../Shapefile/Balearic_Islands/Balearic_4326.shp")
-marine.sp <- read_sf("../Shapefile/Maritime_boundaries_balearic/Marine_boundaries_Balearic_polygon_4326.shp")
-
-sp.gbif.sf <- sp.gbif$data %>% 
-  select(decimalLongitude, decimalLatitude) %>% 
-  na.omit %>% # Remove NA
-  st_as_sf(coords = c("decimalLongitude", "decimalLatitude")) %>% 
-  st_set_crs(st_crs(balearic.sp))
-
-
-pdf(file = "../Plot/Odonata_Balearic.pdf")
-ggplot() +
-  geom_sf(data = balearic.sp) +
-  geom_sf(data = marine.sp, fill = NA) +
-  geom_sf(data = sp.gbif.sf, size = .5, color = "#FFC465") +
-  theme_bw()
-dev.off()
-
-rm(list = ls())
+# #####################
+# # Distribution plot #
+# #####################
+# 
+# # Load Balearic shape file
+# balearic.sp <- read_sf("../Shapefile/Balearic_Islands/Balearic_4326.shp")
+# marine.sp <- read_sf("../Shapefile/Maritime_boundaries_balearic/Marine_boundaries_Balearic_polygon_4326.shp")
+# 
+# sp.gbif.sf <- sp.gbif$data %>% 
+#   select(decimalLongitude, decimalLatitude) %>% 
+#   na.omit %>% # Remove NA
+#   st_as_sf(coords = c("decimalLongitude", "decimalLatitude")) %>% 
+#   st_set_crs(st_crs(balearic.sp))
+# 
+# 
+# pdf(file = "../Plot/Odonata_Balearic.pdf")
+# ggplot() +
+#   geom_sf(data = balearic.sp) +
+#   geom_sf(data = marine.sp, fill = NA) +
+#   geom_sf(data = sp.gbif.sf, size = .5, color = "#FFC465") +
+#   theme_bw()
+# dev.off()
+# 
+# rm(list = ls())

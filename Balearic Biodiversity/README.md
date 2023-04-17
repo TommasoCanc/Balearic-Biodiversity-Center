@@ -59,9 +59,10 @@ Databases used for retrieve higher taxonomic rank
  > _**NOTE**_: Species with NA values do not have information in the IUCN web. Thus we have to be checked manually.
    
    👉 _**Tip**_: We can follow these steps to add IUCN information easily:
-       * Filter the column _country_ for Spain to select the present taxa.
-       * Filter the column _country_ for NA to select the taxa with any information in IUCN.
-       * Filter the column _country_ excluding Spain and NA to select the absent taxa. If a taxon has been flagged as present (point 1) has to remain present since the taxon distribution is extended to many countries.   
+   
+   * Filter the column _country_ for Spain to select the present taxa.
+   * Filter the column _country_ for NA to select the taxa with any information in IUCN.
+   * Filter the column _country_ excluding Spain and NA to select the absent taxa. If a taxon has been flagged as present (point 1) has to remain present since the taxon distribution is extended to many countries.   
    
    📁 Save in **04_IUCN**
    
@@ -105,7 +106,8 @@ We need to add a column in the .csv **higher taxonomy** to include the GBIF info
 
 📁 Save in **06_gbif
 
- 👉 _**Tip**_: We can follow these steps to add IUCN information easily:
-       * Filter the column _country_ for Spain to select the present taxa.
-       * Filter the column _country_ for NA to select the taxa with any information in IUCN.
-       * Filter the column _country_ excluding Spain and NA to select the absent taxa. If a taxon has been flagged as present (point 1) has to remain present since the taxon distribution is extended to many countries.   
+ 👉 _**Tip**_: We can follow these steps to add GBIF information easily:
+ 
+   * Filter the column _presenceAbsence.x_ to select the present taxa.
+   * Filter the column _presenceAbsence.y_ to select the present taxa. Be careful, check if all the record are present also in the original list. If not the new taxa are new for the Balearic Islands.
+   *  * Filter the column _presenceAbsence.x_ to select the absent taxa.
