@@ -20,8 +20,10 @@
 writeFasta <- function(data, filename){
   fastaLines = c()
   for (rowNum in 1:nrow(data)){
-    fastaLines = c(fastaLines, paste0(">", data[rowNum,"seqName"]))
-    fastaLines = c(fastaLines, data[rowNum,"nucleotides"])
+    fastaLines = c(fastaLines, paste0(">", data[rowNum, "seqName"], ";", 
+                                      data[rowNum, "seqTaxa"], ";",
+                                      data[rowNum, "seqBP"]))
+    fastaLines = c(fastaLines, data[rowNum, "nucleotides"])
   }
   fileConn <- file(filename)
   writeLines(fastaLines, fileConn)

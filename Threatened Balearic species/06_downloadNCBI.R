@@ -106,9 +106,12 @@ for(j in 1:3) {
       seq <- gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank))
       # ncbi.2$nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
       nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
-      nucleotideFasta.1 <- data.frame(seqName =  ncbi.2$sampleid, 
+      ncbi.2$nucleotides_bp <- nchar(nucleotides)
+      
+      nucleotideFasta.1 <- data.frame(seqName =  ncbi.2$sampleid,
+                                      seqTaxa = taxonomy[1],
+                                      seqBP = nchar(nucleotides),
                                       nucleotides = nucleotides)
-      ncbi.2$nucleotides_bp <- nchar(as.character(ncbi.2$nucleotides[1]))
       
       # VOUCHER
       ncbi.2$voucher <- ifelse(grepl("specimen_voucher=", gbank) == T, 
@@ -166,9 +169,5 @@ rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy, nucleotideFasta.1, nucleotides,
 # Save ncbi info and fasta file
 write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_20_",Sys.Date(),".csv"), row.names = FALSE)
 writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1_20_",Sys.Date(),".fasta"))
-
-
-
-
 
 rm(list = ls())
