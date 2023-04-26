@@ -2,8 +2,8 @@
 # Title: NCBI download data          #
 # Author: Tommaso Cancellario        #
 # Reviewer: Laura Triginer           #
-# Creation: 2023 - 03 - 10           #
-# Last update: 2023 - 03 - 13        #
+# Creation: 2023 - 04 - 26           #
+# Last update: 2023 - 04 - 26        #
 ######################################
 
 # More info about rentrez package:
@@ -23,7 +23,7 @@ source("/Users/tcanc/Desktop/GitHub/Balearic-Biodiversity-Center/Functions/write
 # Load sheet
 # getSheetNames("./tmp/threatenedSpecies_2023-04-24.xlsx")
 sp <- readxl::read_excel("./tmp/threatenedSpecies_2023-04-24.xlsx", 
-                           sheet = "02_downloadSynonyms")
+                         sheet = "02_downloadSynonyms")
 head(sp)
 
 # Original name
@@ -35,15 +35,17 @@ spSynonyms <- unique(sp$synonym)
 # NCBI database search
 dataBase <- "nuccore"
 
-# Term to search
-# term <- "Helosciadium bermejoi[ORGN]"
+# Create folder to store downloaded txt files for each species
+dir.create("./results/originalNamesTxt/")
 
-# Metadata info catch
-ncbiInfo <- data.frame()
-nucleotideFasta <- data.frame()
+# Remove all file into the directory. This directory has to be clean at the beginning.
+unlink(list.files("./results/originalNamesTxt", full.names = TRUE)) 
 
-# Original species names
-for(j in 1:length(spOriginal)) {
+
+# Download row data fram NCBI original species names 
+length(spOriginal)
+
+for(j in 1:10) {
   
   print(paste("----", spOriginal[j], ";", j, "of", length(spOriginal), "----"))
   
@@ -52,23 +54,56 @@ for(j in 1:length(spOriginal)) {
   
   # Search in Nucleotide database with the terms above.
   a <- entrez_search(db = dataBase, term = term, use_history = T)
-  # We need to set the maximum number of results equalt to the number of hits
-  a <- entrez_search(db = dataBase, term = term, retmax = a$count, use_history = T)
   
-  if(isTRUE(length(a$ids) != 0)) {
+  if(length(a$ids) != 0){
+  
+    # Download chunk of 1000 records
+    for(seq_start in seq(0, a$count, 1000)){
+      Sys.sleep(1) # Time in seconds
+      recs <- entrez_fetch(db = "nuccore", web_history = a$web_history,
+                           rettype = "gbwithparts", retmode = "text", 
+                           retmax = 1000, retstart = seq_start)
+      cat(recs, file = paste0("./results/originalNamesTxt/", j, "_",spOriginal[j], ".txt"), append=TRUE)
+      print(seq_start)
+    }
     
-    for(i in 1:length(a$ids)){
+  } else {
+    # If the taxa it is not present in NCBI we procuce a file with "No data" string
+    cat("No data\n", file = paste0("./results/originalNamesTxt/", j, "_",spOriginal[j], ".txt"))
+    
+  }
+  
+}
+
+
+# Create a dataframe to contain NCBI info and fasta
+ncbiInfo <- data.frame()
+nucleotideFasta <- data.frame()
+
+# Load TXT in r
+sp.files <- list.files("./results/originalNamesTxt", full.names = TRUE)
+numbers <-  as.numeric(regmatches(sp.files, regexpr("[0-9]+", sp.files)))
+sp.files <- sp.files[order(numbers)]
+sp.files
+
+
+for(i in 1:length(sp.files)){
+  
+  rowNcbi <- paste(readLines(sp.files[i]), collapse="\n")
+  
+  if(rowNcbi != "No data"){
+    
+    ncbi.2 <- as.data.frame(matrix(NA, ncol=13))
+    colnames(ncbi.2) <- c("sampleid", "species_name","country",
+                          "lat", "lon", "markercode", "nucleotides_bp",
+                          "definition", "voucher", "pubmed", "collection_date",
+                          "INV", "authors")
+    
+    recs.ls <- as.list(unlist(strsplit(rowNcbi, '//\n\n')))
+    
+    for(j in 1:length(recs.ls)){
       
-      ncbi.2 <- as.data.frame(matrix(NA, ncol=13))
-      colnames(ncbi.2) <- c("sampleid", "species_name","country",
-                            "lat", "lon", "markercode", "nucleotides_bp",
-                            "definition", "voucher", "pubmed", "collection_date",
-                            "INV", "authors")
-      
-      # The IDs are the most important thing returned here. They allow us to fetch records 
-      # matching those IDs, gather summary data about them or find cross-referenced records 
-      # in other databases. 
-      gbank <- entrez_fetch(db = "nuccore", id = a$ids[i], rettype = "gbwithparts", retmode = "text")
+      gbank <- recs.ls[[j]]
       
       # ACCESSION NUMBER
       # ncbi.2$sampleid <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
@@ -141,7 +176,6 @@ for(j in 1:length(spOriginal)) {
       ncbiInfo <- rbind(ncbiInfo, ncbi.2)
       nucleotideFasta <- rbind(nucleotideFasta, nucleotideFasta.1)
       
-      print(paste0(i, "---- of ----", length(a$ids), "(", round((i/length(a$ids))*100, digits = 2),"%)"))  
     }
     
   } else {
@@ -153,7 +187,8 @@ for(j in 1:length(spOriginal)) {
                           "INV", "authors")
     
     ncbi.2[1, ] <- "No data"
-    ncbi.2$species_name <- spOriginal[j]
+    ncbi.2$species_name <- gsub(".*[_]([^.]+)[.].*", "\\1", sp.files[i])
+    
     
     # Create total dataset   
     ncbiInfo <- rbind(ncbiInfo, ncbi.2)
@@ -171,3 +206,5 @@ write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_20_",Sys.Date(),".csv"), row.na
 writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1_20_",Sys.Date(),".fasta"))
 
 rm(list = ls())
+
+
