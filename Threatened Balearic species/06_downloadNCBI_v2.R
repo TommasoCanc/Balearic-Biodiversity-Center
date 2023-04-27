@@ -36,16 +36,13 @@ spSynonyms <- unique(sp$synonym)
 dataBase <- "nuccore"
 
 # Create folder to store downloaded txt files for each species
-dir.create("./results/originalNamesTxt/")
+dir.create("./results/originalNamesTxt_1/")
 
 # Remove all file into the directory. This directory has to be clean at the beginning.
 unlink(list.files("./results/originalNamesTxt", full.names = TRUE)) 
 
-
 # Download row data fram NCBI original species names 
-length(spOriginal)
-
-for(j in 1:10) {
+for(j in 1:length(spOriginal)) {
   
   print(paste("----", spOriginal[j], ";", j, "of", length(spOriginal), "----"))
   
@@ -75,7 +72,6 @@ for(j in 1:10) {
   
 }
 
-
 # Create a dataframe to contain NCBI info and fasta
 ncbiInfo <- data.frame()
 nucleotideFasta <- data.frame()
@@ -86,9 +82,10 @@ numbers <-  as.numeric(regmatches(sp.files, regexpr("[0-9]+", sp.files)))
 sp.files <- sp.files[order(numbers)]
 sp.files
 
-
-for(i in 1:length(sp.files)){
+#length(sp.files)
+for(i in 17:18){
   
+  print(paste("----", i, "of", length(sp.files), "----"))
   rowNcbi <- paste(readLines(sp.files[i]), collapse="\n")
   
   if(rowNcbi != "No data"){
@@ -102,12 +99,12 @@ for(i in 1:length(sp.files)){
     recs.ls <- as.list(unlist(strsplit(rowNcbi, '//\n\n')))
     
     for(j in 1:length(recs.ls)){
-      
+      print(paste("----", j, "of", length(recs.ls), "----"))
       gbank <- recs.ls[[j]]
       
       # ACCESSION NUMBER
       # ncbi.2$sampleid <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
-      ncbi.2$sampleid <- word(gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank)), 1)
+      ncbi.2$sampleid <- word(gsub("\"", "", gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank)), 1)
       
       # TAXONOMY
       taxonomy <- unlist(strsplit(taxonomy <- gsub("\"", "", gsub("^.*ORGANISM\\s*|\\s*.\nREFERENCE.*$", "", gbank)), "\n"))
@@ -115,7 +112,7 @@ for(i in 1:length(sp.files)){
       
       # COUNTRY
       ncbi.2$country <- as.character(ifelse(grepl("country", gbank) == T,
-                                            gsub("\"","",gsub("^.*country=\\s*|\\s*\n.*$", "", gbank)), NA))
+                                            gsub("\"", "", gsub("^.*country=\\s*|\\s*\n.*$", "", gbank)), NA))
       
       # LONGITUDE & LATITUDE
       if(isTRUE(grepl("lat_lon", gbank))) {
@@ -135,10 +132,11 @@ for(i in 1:length(sp.files)){
       
       # MARKER CODE
       ncbi.2$markercode <- ifelse(grepl("product=", gbank) == T,
-                                  gsub("\"","",gsub("^.*product=\\s*|\\s*\n.*$", "", gbank)), NA)
+                                  gsub("\"", "", gsub("^.*product=\\s*|\\s*\n.*$", "", gbank)), NA)
       
       # SEQUENCE
-      seq <- gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank))
+      seq <- as.character(ifelse(grepl("ORIGIN", gbank) == T,
+                                 gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank)), NA))
       # ncbi.2$nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
       nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
       ncbi.2$nucleotides_bp <- nchar(nucleotides)
@@ -150,7 +148,7 @@ for(i in 1:length(sp.files)){
       
       # VOUCHER
       ncbi.2$voucher <- ifelse(grepl("specimen_voucher=", gbank) == T, 
-                               as.character(gsub("\"","",gsub("^.*specimen_voucher=\\s*|\\s*\n.*$", "", gbank))), NA)
+                               as.character(gsub("\"", "", gsub("^.*specimen_voucher=\\s*|\\s*\n.*$", "", gbank))), NA)
       
       # DEFINITION
       def <- str_replace_all(gsub("^.*DEFINITION\\s*|\\s*.\nACCESSION.*$", "", gbank), "[\r\n]" , "")
@@ -200,11 +198,10 @@ for(i in 1:length(sp.files)){
 rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy, nucleotideFasta.1, nucleotides, 
    gbank, term, a, j, def)
 
-
 # Save ncbi info and fasta file
-write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_20_",Sys.Date(),".csv"), row.names = FALSE)
-writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1_20_",Sys.Date(),".fasta"))
+dir.create("./results/originalNamesCSV/")
+dir.create("./results/originalNamesFASTA/")
+write.csv(ncbiInfo, paste0("./results/originalNamesCSV/originalNames_1_20_",Sys.Date(),".csv"), row.names = FALSE)
+writeFasta(data = nucleotideFasta, filename = paste0("./results/originalNamesFASTA/originalNames_17_18",Sys.Date(),".fasta"))
 
 rm(list = ls())
-
-
