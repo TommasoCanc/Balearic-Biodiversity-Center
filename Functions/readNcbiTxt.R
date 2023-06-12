@@ -1,78 +1,43 @@
-######################################
-# Title: NCBI download data          #
-# Author: Tommaso Cancellario        #
-# Reviewer: Laura Triginer           #
-# Creation: 2023 - 03 - 10           #
-# Last update: 2023 - 03 - 13        #
-######################################
-
-# More info about rentrez package:
-# https://cran.r-project.org/web/packages/rentrez/vignettes/rentrez_tutorial.html
-
-# Load libraries
-library(rentrez)
-library(stringr)
-library(seqinr)
-
-# Set WD
-setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/threatened_Balearic_species/")
+# READ NCBI txt
 
 # Functions
 source("/Users/tcanc/Desktop/GitHub/Balearic-Biodiversity-Center/Functions/writeFasta.R")
 
-# Load sheet
-# getSheetNames("./tmp/threatenedSpecies_2023-04-24.xlsx")
-sp <- readxl::read_excel("./tmp/threatenedSpecies_2023-04-24.xlsx", 
-                           sheet = "02_downloadSynonyms")
-head(sp)
 
-# Original name
-spOriginal <- unique(sp$originalName)
+# Load TXT in r
+sp.files <- list.files("./results/originalNamesTxt", full.names = TRUE)
+numbers <-  as.numeric(regmatches(sp.files, regexpr("[0-9]+", sp.files)))
+sp.files <- sp.files[order(numbers)]
+sp.files
 
-# Synonyms name
-spSynonyms <- unique(sp$synonym)
 
-# NCBI database search
-dataBase <- "nuccore"
-
-# Term to search
-# term <- "Helosciadium bermejoi[ORGN]"
-
-# Metadata info catch
+# Create a dataframe to contain NCBI info and fasta
 ncbiInfo <- data.frame()
 nucleotideFasta <- data.frame()
 
-# Original species names
-for(j in 1:length(spOriginal)) {
+#length(sp.files)
+for(i in 1:2){
   
-  print(paste("----", spOriginal[j], ";", j, "of", length(spOriginal), "----"))
+  print(paste("----", i, "of", length(sp.files), "----"))
+  rowNcbi <- paste(readLines(sp.files[i]), collapse="\n")
   
-  # Term to search
-  term <- paste0(spOriginal[j], "[ORGN]")
-  
-  # Search in Nucleotide database with the terms above.
-  a <- entrez_search(db = dataBase, term = term, use_history = T)
-  # We need to set the maximum number of results equalt to the number of hits
-  a <- entrez_search(db = dataBase, term = term, retmax = a$count, use_history = T)
-  
-  if(isTRUE(length(a$ids) != 0)) {
+  if(rowNcbi != "No data"){
     
-    for(i in 1:length(a$ids)){
-      
-      ncbi.2 <- as.data.frame(matrix(NA, ncol=13))
-      colnames(ncbi.2) <- c("sampleid", "species_name","country",
-                            "lat", "lon", "markercode", "nucleotides_bp",
-                            "definition", "voucher", "pubmed", "collection_date",
-                            "INV", "authors")
-      
-      # The IDs are the most important thing returned here. They allow us to fetch records 
-      # matching those IDs, gather summary data about them or find cross-referenced records 
-      # in other databases. 
-      gbank <- entrez_fetch(db = "nuccore", id = a$ids[i], rettype = "gbwithparts", retmode = "text")
+    ncbi.2 <- as.data.frame(matrix(NA, ncol=13))
+    colnames(ncbi.2) <- c("sampleid", "species_name","country",
+                          "lat", "lon", "markercode", "nucleotides_bp",
+                          "definition", "voucher", "pubmed", "collection_date",
+                          "INV", "authors")
+    
+    recs.ls <- as.list(unlist(strsplit(rowNcbi, '//\n\n')))
+    
+    for(j in 1:length(recs.ls)){
+      print(paste("----", j, "of", length(recs.ls), "----"))
+      gbank <- recs.ls[[j]]
       
       # ACCESSION NUMBER
       # ncbi.2$sampleid <- gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank))
-      ncbi.2$sampleid <- word(gsub("\"","",gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank)), 1)
+      ncbi.2$sampleid <- word(gsub("\"", "", gsub("^.*ACCESSION\\s*|\\s*\n.*$", "", gbank)), 1)
       
       # TAXONOMY
       taxonomy <- unlist(strsplit(taxonomy <- gsub("\"", "", gsub("^.*ORGANISM\\s*|\\s*.\nREFERENCE.*$", "", gbank)), "\n"))
@@ -80,7 +45,7 @@ for(j in 1:length(spOriginal)) {
       
       # COUNTRY
       ncbi.2$country <- as.character(ifelse(grepl("country", gbank) == T,
-                                            gsub("\"","",gsub("^.*country=\\s*|\\s*\n.*$", "", gbank)), NA))
+                                            gsub("\"", "", gsub("^.*country=\\s*|\\s*\n.*$", "", gbank)), NA))
       
       # LONGITUDE & LATITUDE
       if(isTRUE(grepl("lat_lon", gbank))) {
@@ -100,10 +65,11 @@ for(j in 1:length(spOriginal)) {
       
       # MARKER CODE
       ncbi.2$markercode <- ifelse(grepl("product=", gbank) == T,
-                                  gsub("\"","",gsub("^.*product=\\s*|\\s*\n.*$", "", gbank)), NA)
+                                  gsub("\"", "", gsub("^.*product=\\s*|\\s*\n.*$", "", gbank)), NA)
       
       # SEQUENCE
-      seq <- gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank))
+      seq <- as.character(ifelse(grepl("ORIGIN", gbank) == T,
+                                 gsub("\n", "", gsub("^.*ORIGIN\\s*|\\//.*$", "", gbank)), NA))
       # ncbi.2$nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
       nucleotides <- gsub(" ", "", gsub("[[:digit:]]+", "", seq))
       ncbi.2$nucleotides_bp <- nchar(nucleotides)
@@ -115,7 +81,7 @@ for(j in 1:length(spOriginal)) {
       
       # VOUCHER
       ncbi.2$voucher <- ifelse(grepl("specimen_voucher=", gbank) == T, 
-                               as.character(gsub("\"","",gsub("^.*specimen_voucher=\\s*|\\s*\n.*$", "", gbank))), NA)
+                               as.character(gsub("\"", "", gsub("^.*specimen_voucher=\\s*|\\s*\n.*$", "", gbank))), NA)
       
       # DEFINITION
       def <- str_replace_all(gsub("^.*DEFINITION\\s*|\\s*.\nACCESSION.*$", "", gbank), "[\r\n]" , "")
@@ -141,7 +107,6 @@ for(j in 1:length(spOriginal)) {
       ncbiInfo <- rbind(ncbiInfo, ncbi.2)
       nucleotideFasta <- rbind(nucleotideFasta, nucleotideFasta.1)
       
-      print(paste0(i, "---- of ----", length(a$ids), "(", round((i/length(a$ids))*100, digits = 2),"%)"))  
     }
     
   } else {
@@ -153,21 +118,29 @@ for(j in 1:length(spOriginal)) {
                           "INV", "authors")
     
     ncbi.2[1, ] <- "No data"
-    ncbi.2$species_name <- spOriginal[j]
+    ncbi.2$species_name <- gsub(".*[_]([^.]+)[.].*", "\\1", sp.files[i])
+    
     
     # Create total dataset   
     ncbiInfo <- rbind(ncbiInfo, ncbi.2)
     
   }
+
+  # Save csv file  
+  write.csv(ncbiInfo, paste0("./results/originalNamesCSV/", # Change directory  
+                             i, "_", gsub(".*[_]([^.]+)[.].*", "\\1", sp.files[i]), "_", 
+                             Sys.Date(),".csv"), 
+            row.names = FALSE)
   
+  # Save fasta file
+  writeFasta(data = nucleotideFasta, 
+             filename = paste0("./results/originalNamesFASTA/", # Change directory  
+                               i, "_", gsub(".*[_]([^.]+)[.].*", "\\1", sp.files[i]), "_", 
+                               Sys.Date(),".fasta"))
+  
+
+    
 }
 
 rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy, nucleotideFasta.1, nucleotides, 
    gbank, term, a, j, def)
-
-
-# Save ncbi info and fasta file
-write.csv(ncbiInfo, paste0("~/Desktop/ncbiInfo_1_20_",Sys.Date(),".csv"), row.names = FALSE)
-writeFasta(data = nucleotideFasta, filename = paste0("~/Desktop/ncbiFasta_1_20_",Sys.Date(),".fasta"))
-
-rm(list = ls())

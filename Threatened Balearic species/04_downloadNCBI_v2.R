@@ -42,7 +42,7 @@ dir.create("./results/originalNamesTxt/")
 unlink(list.files("./results/originalNamesTxt", full.names = TRUE)) 
 
 # Download row data fram NCBI original species names 
-# for(j in 1:length(spOriginal)) {
+for(j in 1:length(spOriginal)) {
   
   print(paste("----", spOriginal[j], ";", j, "of", length(spOriginal), "----"))
   
@@ -80,6 +80,9 @@ unlink(list.files("./results/originalNamesTxt", full.names = TRUE))
 # sed '/ORIGIN/,/\/\//d' "$file" > "$new_file"
 # done
 
+# command <- "ls ~/Desktop/"
+# system(command, intern = TRUE)
+
 
 # Load TXT in r
 sp.files <- list.files("./results/originalName_NOsequence", full.names = TRUE, pattern = "removed")
@@ -91,8 +94,7 @@ head(sp.files)
 # ncbiInfo <- data.frame()
 # nucleotideFasta <- data.frame()
 
-#length(sp.files)
-for(i in 1:10){
+for(i in 1:length(sp.files)){
   
   print(paste("----", i, "of", length(sp.files), "----"))
   rowNcbi <- paste(readLines(sp.files[i]), collapse="\n")
@@ -218,7 +220,7 @@ for(i in 1:10){
 }
 
 rm(ncbi.2, i, lat, lon, lat_lon, seq, taxonomy, nucleotideFasta.1, nucleotides, 
-   gbank, term, a, j, def)
+   gbank, term, a, j, def, recs.ls, rowNcbi)
 
 # # Save ncbi info and fasta file
 # dir.create("./results/originalNamesCSV/")
