@@ -10,19 +10,19 @@
 library(rgbif)
 
 # Set WD
-setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/threatened_Balearic_species/")
+# setwd("/Users/tcanc/Library/CloudStorage/OneDrive-UniversitatdelesIllesBalears/Biodiversidad Baleares/threatened_Balearic_species/")
 setwd("/Users/tcanc/Desktop/")
 
 
 # Load species list
-species.list <- read.csv("./Mollusca_2023_07_04.csv", sep = ";")
+species.list <- read.csv("./biomonitoR/AMBI/name.csv", sep = ";")
 head(species.list)
 
-sp <- unique(species.list$Taxon)
+sp <- unique(species.list$Taxa)
 
 # Reference database: GBIF
 spCheck <- data.frame()
-i=14
+
 for(i in 1:length(sp)){
   
   tax_key <- name_backbone(sp[i])
@@ -42,6 +42,7 @@ for(i in 1:length(sp)){
                             genus = ifelse("genus" %in% colnames(acceptedName.check), acceptedName.check$genus, NA),
                             species = ifelse("species" %in% colnames(acceptedName.check), acceptedName.check$species, NA),
                             subspecies = ifelse(stringr::str_count(acceptedName.check$canonicalName, "\\w+") == 3, acceptedName.check$canonicalName, NA), # ifelse("subspecies" %in% colnames(acceptedName.check), acceptedName.check$subspecies, NA),
+                            scientificName = acceptedName.check$scientificName,
                             taxonomicStatusOriginalName = ifelse("status" %in% colnames(tax_key), tax_key$status, NA),
                             taxonomicRank = ifelse("rank" %in% colnames(acceptedName.check), acceptedName.check$rank, NA)
     )
@@ -62,6 +63,7 @@ for(i in 1:length(sp)){
                             genus = "Not found",
                             species = "Not found",
                             subspecies = "Not found",
+                            scientificName = "Not found",
                             taxonomicStatusOriginalName = "Not found",
                             taxonomicRank = "Not found")
     
