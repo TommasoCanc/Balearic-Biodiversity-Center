@@ -19,12 +19,13 @@
 
 cbb_tree <- function(x){
   
-  if (!require("stringr")) install.packages("stringr")
-  
   # Check if the x object is a data frame. If not stop the function
   if (!is.data.frame(x)) {
     stop("Input is not a data frame.")
   }
+  
+  # Load or install pack if required
+  if (!require("stringr")) install.packages("stringr")
   
   colnames(x) <- str_to_title(colnames(x)) # Upper case to first letter
   

@@ -10,11 +10,11 @@
 #' @keywords COL
 #'
 #' @examples
-#' df <- read.csv("./Desktop/Catalogo_Odonata_2023-08-01.csv")
+#' df <- read.csv("./Template/Annelida_cbb_tree.csv")
 #'
-#'df <- df %>% 
-#'  select(Phylum, Order, Family, Genus, Species, Subspecies)
-
+#' df <- df[ , "Taxa"]
+#'
+#' cbbdbCol(df)
 
 cbbdbCol <- function(x) {
   
@@ -23,7 +23,7 @@ cbbdbCol <- function(x) {
     stop("Input is not a vector.")
   }
   
-  # Load packages
+  # Load or install pack if required
   if (!require("pacman")) install.packages("pacman")
   pacman::p_load(dplyr, jsonlite, stringr)
   
@@ -706,7 +706,10 @@ cbbdbCol <- function(x) {
     
   }
   
-  print(paste("You have", len_x - length(x), "duplicated. Please check charefully your list"))
+  print(paste("You have", len_x - length(x), "duplicated.",
+              "You have", length(which(colNames$colNamesAccepted == "Not found")), "Not Found.",
+              "Please check charefully your list"))
+  
   return(colNames)
   
 }
