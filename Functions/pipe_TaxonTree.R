@@ -10,25 +10,26 @@
 #'
 #' @keywords cbb_tree
 #' @examples
-#' df <- read.csv("./Desktop/Catalogo_Odonata_2023-08-01.csv")
+#' df <- read.csv("./Template/Annelida.csv", sep = ";")
 #'
-#' df <- df %>%
-#' select(Phylum, Order, Family, Genus, Species, Subspecies)
-#'  
+#' df <- df[ ,c("kingdom", "phylum", "order", "family", "genus", "species", "subspecies")]
+#'
 #' cbb_tree(df)
 
-  
-x = df
 
 cbb_tree <- function(x){
+  
+  if (!require("stringr")) install.packages("stringr")
   
   # Check if the x object is a data frame. If not stop the function
   if (!is.data.frame(x)) {
     stop("Input is not a data frame.")
   }
   
-  taxa.col <- c(colnames(x), "Taxa")
-    
+  colnames(x) <- str_to_title(colnames(x)) # Upper case to first letter
+  
+  taxa.col <- c(colnames(x), "Taxa") 
+  
   empty.df <- as.data.frame(matrix(ncol = length(taxa.col), nrow = 0))
   colnames(empty.df) <- taxa.col
   DF <- empty.df
@@ -53,13 +54,10 @@ cbb_tree <- function(x){
     DF <- rbind.data.frame(DF, empty.df)
   }
 
-  
-  # Add si existe esta columna !!!!!!!!!!!!
-  DF$Species <- word(DF$Species, -1)
-  DF$Subspecies <- word(DF$Subspecies, -1)
+  # Check if exist columns Species and subspecies in data frame
+  if("Species" %in% colnames(x)){DF$Species <- word(DF$Species, -1)}
+  if("Subspecies" %in% colnames(x)){DF$Subspecies <- word(DF$Subspecies, -1)}
   DF <- DF[!duplicated(DF), ]
-  
-  # DF <- DF[, match(taxa.col, colnames(DF))]
   
   return(DF)
   

@@ -6,20 +6,19 @@
 # Last update: 2024 - 03 - 04                #
 ##############################################
 
-library(dplyr)
-library(tidyverse)
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr, tidyverse)
 
 # Load functions
-fun <- list.files("./Desktop/GitHub/CBB_dataAnalysis/Balearic_species_lists_pipeline_test/fun/", full.names = TRUE)
+fun <- list.files("YOUR PATH TO FUNCTION FOLDER", full.names = TRUE)
 for (i in fun) {
   source(i)
 }; rm (fun, i)
 
 
 # Load reviewed taxonomy file
-
-
-df <- read.csv("./Desktop/miriapodos.csv", sep = ";")
+df <- read.csv("YOUR PATH TO TAXON CSV", sep = ";")
 
 df <- df %>% 
   select(Kingdom, Phylum, Order, Family, Genus, Species, Subspecies)
@@ -30,4 +29,4 @@ head(df)
 df_long <- cbb_tree(df) 
 
 # Search taxonomy in COL
-df_col <- cbbdbCol(df_long$Taxa[30:40])
+df_col <- cbbdbCol(df_long$Taxa)
