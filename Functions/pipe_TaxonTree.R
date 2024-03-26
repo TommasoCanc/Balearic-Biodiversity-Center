@@ -10,7 +10,7 @@
 #'
 #' @keywords cbb_tree
 #' @examples
-#' df <- read.csv("./Template/Annelida.csv", sep = ";")
+#' df <- read.csv("./Template/Annelida.csv")
 #'
 #' df <- df[ ,c("kingdom", "phylum", "order", "family", "genus", "species", "subspecies")]
 #'
