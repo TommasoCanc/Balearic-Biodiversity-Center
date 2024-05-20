@@ -11,11 +11,8 @@
 #' @keywords cbb_tree
 #' @examples
 #' df <- read.csv("./Template/Annelida.csv")
-#'
 #' df <- df[ ,c("kingdom", "phylum", "order", "family", "genus", "species", "subspecies")]
-#'
 #' cbb_tree(df)
-
 
 cbb_tree <- function(x){
   
@@ -58,6 +55,7 @@ cbb_tree <- function(x){
   # Check if exist columns Species and subspecies in data frame
   if("Species" %in% colnames(x)){DF$Species <- word(DF$Species, -1)}
   if("Subspecies" %in% colnames(x)){DF$Subspecies <- word(DF$Subspecies, -1)}
+  if("Variety" %in% colnames(x)){DF$Variety <- word(DF$Variety, -1)}
   DF <- DF[!duplicated(DF), ]
   
   return(DF)
