@@ -16,6 +16,12 @@
 #'
 #' cbbdbCol(df)
 
+a <- cbbdbCol(df)
+
+df <- 'Capparis spinosa var. canescens'
+
+
+
 cbbdbCol <- function(x) {
   
   # Check if the x object is a data frame. If not stop the function
@@ -40,6 +46,7 @@ cbbdbCol <- function(x) {
   colNames <- data.frame()
   
   for (i in 1:length(x)) {
+    
     # Taxonomy source
     taxonSource <- "Catalogue of Life"
     
@@ -98,6 +105,10 @@ cbbdbCol <- function(x) {
         subspeciesAuthor = "Not found",
         subspeciesSource = "Not found",
         subspeciesOrigin = "Not found",
+        Variety = "Not found",
+        varietyAuthor = "Not found",
+        varietySource = "Not found",
+        varietyOrigin = "Not found",
         originalStatus = "Not found",
         taxonRank = "Not Found",
         brackish = "Not Found",
@@ -195,6 +206,10 @@ cbbdbCol <- function(x) {
           ch0_to_Na(classificationHigher$name[classificationHigher$rank == "subspecies"])
         authorHigherSubspecies <-
           ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "subspecies"])
+        taxonHigherVariety <-
+          ch0_to_Na(classificationHigher$name[classificationHigher$rank == "variety"])
+        authorHigherVariety <-
+          ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "variety"])
         
         
         # Dataframe to add to the main one
@@ -246,6 +261,18 @@ cbbdbCol <- function(x) {
           ),
           subspeciesSource = "",
           subspeciesOrigin = "",
+          Variety = ifelse(
+            rank == "variety",
+            word(taxonLower,-1),
+            word(taxonHigherVariety,-1)
+          ),
+          varietyAuthor = ifelse(
+            rank == "variety",
+            authorLower,
+            authorHigherVariety
+          ),
+          varietySource = "",
+          varietyOrigin = "",
           originalStatus = classificationLower$status,
           #ifelse(any(status %in% "accepted"), "accepted", "Many status"),
           taxonRank = rank,
@@ -288,7 +315,11 @@ cbbdbCol <- function(x) {
           rm_origin(colNames.1$Subspecies, taxonSource)
         colNames.1$subspeciesOrigin <-
           rm_origin(colNames.1$Subspecies, taxonOrigin)
-        # any(): check if there are TRUE values in a string
+        colNames.1$varietySource <-
+          rm_origin(colNames.1$Variety, taxonSource)
+        colNames.1$varietyOrigin <-
+          rm_origin(colNames.1$Variety, taxonOrigin)
+      # any(): check if there are TRUE values in a string
       }
       
       # Accepted names
@@ -331,7 +362,7 @@ cbbdbCol <- function(x) {
           )
         
         # Taxon classification
-        taxonHigherKingdom <-
+        taxonHigherKingdom <- 
           ch0_to_Na(classificationHigher$name[classificationHigher$rank == "kingdom"])
         authorHigherKingdom <-
           ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "kingdom"])
@@ -363,6 +394,10 @@ cbbdbCol <- function(x) {
           ch0_to_Na(classificationHigher$name[classificationHigher$rank == "subspecies"])
         authorHigherSubspecies <-
           ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "subspecies"])
+        taxonHigherVariety <-
+          ch0_to_Na(classificationHigher$name[classificationHigher$rank == "variety"])
+        authorHigherVariety <-
+          ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "variety"])
         
         
         # Dataframe to add to the main one
@@ -414,6 +449,18 @@ cbbdbCol <- function(x) {
           ),
           subspeciesSource = "",
           subspeciesOrigin = "",
+          Variety = ifelse(
+            rank == "variety",
+            word(taxonLower,-1),
+            word(taxonHigherVariety,-1)
+          ),
+          varietyAuthor = ifelse(
+            rank == "variety",
+            authorLower,
+            authorHigherVariety
+          ),
+          varietySource = "",
+          varietyOrigin = "",
           originalStatus = status,
           taxonRank = rank,
           brackish = "brackish" %in% classificationLower$environments,
@@ -455,6 +502,10 @@ cbbdbCol <- function(x) {
           rm_origin(colNames.1$Subspecies, taxonSource)
         colNames.1$subspeciesOrigin <-
           rm_origin(colNames.1$Subspecies, taxonOrigin)
+        colNames.1$varietySource <-
+          rm_origin(colNames.1$Variety, taxonSource)
+        colNames.1$varietyOrigin <-
+          rm_origin(colNames.1$Variety, taxonOrigin)
         
       }
       
@@ -558,6 +609,10 @@ cbbdbCol <- function(x) {
             ch0_to_Na(classificationHigher$name[classificationHigher$rank == "subspecies"])
           authorHigherSubspecies <-
             ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "subspecies"])
+          taxonHigherVariety <-
+            ch0_to_Na(classificationHigher$name[classificationHigher$rank == "variety"])
+          authorHigherVariety <-
+            ch0_to_Na(classificationHigher$authorship[classificationHigher$rank == "variety"])
           
           
           # Dataframe to add to the main one
@@ -609,6 +664,18 @@ cbbdbCol <- function(x) {
             ),
             subspeciesSource = "",
             subspeciesOrigin = "",
+            Variety = ifelse(
+              rank == "variety",
+              word(taxonLower,-1),
+              word(taxonHigherVariety,-1)
+            ),
+            subspeciesAuthor = ifelse(
+              rank == "variety",
+              authorLower,
+              authorHigherVariety
+            ),
+            varietySource = "",
+            varietyOrigin = "",
             originalStatus = status,
             taxonRank = rank,
             brackish = "brackish" %in% classificationLower$environments,
@@ -650,6 +717,10 @@ cbbdbCol <- function(x) {
             rm_origin(colNames.1$Subspecies, taxonSource)
           colNames.1$subspeciesOrigin <-
             rm_origin(colNames.1$Subspecies, taxonOrigin)
+          colNames.1$varietySource <-
+            rm_origin(colNames.1$Variety, taxonSource)
+          colNames.1$varietyOrigin <-
+            rm_origin(colNames.1$Variety, taxonOrigin)
           
         } else{
           colNames.1 <- data.frame(
@@ -688,6 +759,10 @@ cbbdbCol <- function(x) {
             subspeciesAuthor = "Not found",
             subspeciesSource = "Not found",
             subspeciesOrigin = "Not found",
+            Variety = "Not found",
+            varietyAuthor = "Not found",
+            varietySource = "Not found",
+            varietyOrigin = "Not found",
             originalStatus = "Not found",
             taxonRank = "Not Found",
             brackish = "Not Found",
