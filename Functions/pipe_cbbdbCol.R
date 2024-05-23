@@ -16,12 +16,6 @@
 #'
 #' cbbdbCol(df)
 
-a <- cbbdbCol(df)
-
-df <- 'Capparis spinosa var. canescens'
-
-
-
 cbbdbCol <- function(x) {
   
   # Check if the x object is a data frame. If not stop the function
