@@ -26,7 +26,7 @@ cbb_tree <- function(x){
   
   colnames(x) <- str_to_title(colnames(x)) # Upper case to first letter
   
-  taxa.col <- c(colnames(x), "Taxa") 
+  taxa.col <- c(colnames(x), "Taxa")
   
   empty.df <- as.data.frame(matrix(ncol = length(taxa.col), nrow = 0))
   colnames(empty.df) <- taxa.col
@@ -48,7 +48,18 @@ cbb_tree <- function(x){
     temp <- temp[which(temp[, temp.name] != ""), , drop = FALSE]
     temp.un <- unique(temp)
     empty.df <- merge(empty.df, temp.un, all.y = TRUE, sort = FALSE)
-    empty.df$Taxa <- temp.un[, temp.name]
+    
+    if(temp.name == 'Subspecies') {
+      empty.df$Taxa <-
+        paste(word(temp.un[, temp.name], 1, 2), 'subsp.', word(temp.un[, temp.name], 3))
+    } else if (temp.name == 'Variety') {
+      empty.df$Taxa <-
+        paste(word(temp.un[, temp.name], 1, 2), 'var.', word(temp.un[, temp.name], 3))
+      
+    } else {
+      empty.df$Taxa <- temp.un[, temp.name]
+    }
+    
     DF <- rbind.data.frame(DF, empty.df)
   }
 
