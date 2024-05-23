@@ -11,7 +11,7 @@
 #' @keywords cbb_tree
 #' @examples
 #' df <- read.csv("./Template/Annelida.csv")
-#' df <- df[ ,c("kingdom", "phylum", "order", "family", "genus", "species", "subspecies")]
+#' df <- df[ ,c("kingdom", "phylum", "order", "family", "genus", "species", "subspecies", "variety")]
 #' cbb_tree(df)
 
 cbb_tree <- function(x){
@@ -24,7 +24,15 @@ cbb_tree <- function(x){
   # Load or install pack if required
   if (!require("stringr")) install.packages("stringr")
   
-  colnames(x) <- str_to_title(colnames(x)) # Upper case to first letter
+  # Check if exist columns completely empty and remove
+  empty_col <- sapply(x, function(col) any(is.na(col))) 
+  rm_col <- which(empty_col == TRUE)
+  x <- x[, -rm_col]
+  
+  paste("The column/s", names(rm_col), "had be removed")
+  
+  # Upper case to first letter
+  colnames(x) <- str_to_title(colnames(x)) 
   
   taxa.col <- c(colnames(x), "Taxa")
   
